@@ -2,10 +2,14 @@
 
 /*Fluxo
 Fazer pull e push pela main
-fazer as alterações e commit pela minha branch
 
+git pull
 git branch - precisa estar na minha
 git checkout weslley -- muda pra minha branch
+git merge main -- vai atualizar minha branch com a main
+------- Fim atualizar minha branch
+
+------- iniciar commit
 git config --list -- conferir se esta remote.origin.url=https://github.com/wesbarros/unibli-backend.git
         no fim da url precisa apontar para o meu github
     Caso esteja errado precisa fazer: git remote set url origin <repositorio certo>
