@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./index.js localhost 3307"
+    "start": "node ./index.js",
+    "nodemon": "nodemon ./index.js localhost 3307"
   },
   "author": "Thyago Erick S. Gois",
   "license": "UNLICENSED",
