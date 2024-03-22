@@ -2,8 +2,7 @@ require('dotenv').config()
 const {
     AUTH0_BASE_URL,
     AUTH0_CLIENT_ID,
-    AUTH0_CLIENT_SECRET,
-    AUTH0_API_IDENTIFIER
+    AUTH0_CLIENT_SECRET
 } = process.env
 
 
