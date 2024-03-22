@@ -1,11 +1,20 @@
 const { Sequelize } = require('sequelize');
 
+require('dotenv').config()
+//console.log(process.env) // remova após confirmar que está funcionando
+const {
+    SEQUELIZE_DIALECT,
+    OCI_ADB_USER_NAME,
+    OCI_ADB_PASSWORD,
+    OCI_ADB_CONNECT_STR
+} = process.env
+
 const sequelize = new Sequelize({
-    dialect: 'oracle',
-    username: 'ADMIN',
-    password: 'UniBliTCC2024',
+    dialect: `${SEQUELIZE_DIALECT}`,
+    username: `${OCI_ADB_USER_NAME}`,
+    password: `${OCI_ADB_PASSWORD}`,
     dialectOptions:{
-        connectString: '(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-saopaulo-1.oraclecloud.com))(connect_data=(service_name=gf9e540c7cf6e79_unibli_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))'
+        connectString: `${OCI_ADB_CONNECT_STR}`
     }
 });
 
