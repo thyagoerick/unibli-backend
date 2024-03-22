@@ -1,6 +1,9 @@
 // Import express
 const express = require('express')
+const cors = require('cors')
 const app = express()
+app.use(cors())
+
 
 // Import do conn para conexão do Oracle com Sequelize
 const conn = require('./db/conn')
@@ -12,6 +15,7 @@ const Usuario = require('./models/Usuario')
 
 /*****************IMPORT ROUTES****************/
 const usuariosRotas =  require('./routes/usuariosRotas')
+const authRotas = require('./routes/auth0ManagementRotas')
 /**********************************************/
 
 
@@ -22,7 +26,9 @@ app.use(express.urlencoded({
 }))
 app.use(express.json()) //Obter o dado do body em json()
 
+
 app.use('/usuarios', usuariosRotas)//significa que o middleware usuariosRotas será acionado para qualquer requisição cujo caminho comece com '/usuarios'.
+app.use('/auth0', authRotas)
 /***********************************************/
 
 
