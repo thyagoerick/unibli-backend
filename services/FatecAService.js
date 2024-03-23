@@ -7,7 +7,7 @@ const {
 const {MongoClient} = require('mongodb')
 
 // cria a uri que é o protocolo mongo + IP do servidor
-const uri = `mongodb+srv://weslleywbarros:UniBli123@cluster0.va50zjx.mongodb.net/`
+const uri = `${MONGO_BASE_CONNECT_URI}`
 
 // Instancia um objeto de cliente para o a collection de acervo no Mongo
 const acervo = new MongoClient(uri)
