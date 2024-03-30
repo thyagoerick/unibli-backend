@@ -14,6 +14,7 @@ const Usuario = require('./models/Usuario')
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
+const testeRotas = require('./routes/testeRotas.js')
 const usuariosRotas =  require('./routes/usuariosRotas')
 const authRotas = require('./routes/auth0ManagementRotas')
 /**********************************************/
@@ -27,8 +28,11 @@ app.use(express.urlencoded({
 app.use(express.json()) //Obter o dado do body em json()
 
 
+app.use('/teste', testeRotas)//podem colocar rotas apenas para testar aqui
 app.use('/usuarios', usuariosRotas)//significa que o middleware usuariosRotas será acionado para qualquer requisição cujo caminho comece com '/usuarios'.
 app.use('/auth0', authRotas)
+
+
 /***********************************************/
 
 
