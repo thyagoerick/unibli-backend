@@ -26,10 +26,14 @@ module.exports = class FatecAService{
             return res.json(livros); // Vai no banco em cima e retornar os dados localizados
         } catch(err) {
             console.log(err)
-        } finally {
+        } 
+        
+        /*
+        finally {
             await acervo.close(); // Fechando a conexão com o banco de dados
             console.log('Conexão fechada com o MongoDB')
         }
+        */
     }
 
 }
