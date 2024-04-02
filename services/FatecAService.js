@@ -1,16 +1,12 @@
 require('dotenv').config()
+const {MongoClient, ObjectId} = require('mongodb')
+
 const {
     MONGO_BASE_CONNECT_URI,
 } = process.env
 
-// Aqui criar o serviço para o banco Mongo
-const {MongoClient} = require('mongodb')
-
-// cria a uri que é o protocolo mongo + IP do servidor
-const uri = `${MONGO_BASE_CONNECT_URI}`
-
 // Instancia um objeto de cliente para o a collection de acervo no Mongo
-const acervo = new MongoClient(uri)
+const acervo = new MongoClient(`${MONGO_BASE_CONNECT_URI}`)
 try {
     acervo.connect().then(() => console.log("Conectado com o MongoDB"))
     
@@ -19,7 +15,7 @@ try {
 
 module.exports = class FatecAService{
 
-    static async listaAcervoFatecA(req, res){
+    static async listaAcervoFatec(req, res){
         try {
             const livros = await acervo.db('fatec1').collection('acervo').find().toArray() // Chamo a conexão, indico o banco, a colection 
             //console.log(livros);
@@ -27,13 +23,23 @@ module.exports = class FatecAService{
         } catch(err) {
             console.log(err)
         } 
+    }
+
+    static async buscaLivroPorId(req, res){
+        const id = req.params.id; // Obtém o ID do livro dos parâmetros da requisição
+        const livroID = new ObjectId(`${id}`)
+        try {
+            const livro = await acervo.db('fatec1').collection('acervo').findOne({_id: livroID})// Encontra o livro com o ID fornecido
+            console.log(livro);
         
-        /*
-        finally {
-            await acervo.close(); // Fechando a conexão com o banco de dados
-            console.log('Conexão fechada com o MongoDB')
-        }
-        */
+            livro // Se nenhum livro for encontrado com o ID fornecido
+            ? res.json(livro) // Retorna o livro encontrado
+            : res.status(404).json({ message: "Livro não encontrado" });
+            
+        } catch(err) {
+            console.log(err);
+            return res.status(500).json({ message: "Erro ao buscar o livro" }); // Retorna um erro se algo der errado
+        } 
     }
 
 }
