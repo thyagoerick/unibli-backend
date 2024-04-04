@@ -24,7 +24,7 @@ module.exports = class Auth0ManagementService {
 
             const data = await response.json();
             // Envia os dados de volta como resposta para o navegador
-            console.log(data);
+            //console.log(data);
             res.json(data);
         } catch (error) {
             // Se houver um erro, repassa para o próximo middleware de erro
