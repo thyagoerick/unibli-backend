@@ -1,9 +1,6 @@
 // Import express
 const express = require('express')
-const cors = require('cors')
 const app = express()
-
-app.use(cors())
 
 
 // Import do conn para conexão do Oracle com Sequelize

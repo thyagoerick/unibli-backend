@@ -1,20 +1,22 @@
 require('dotenv').config()
 const FatecAService = require('./FatecAService')
-
+const  { requestOptionsGET } = require('../config/requestOptions')
 
 const urlFatec2 = `${process.env.OCI_BASE_URL_FATEC2}/livro`
 /**********************************************************/
 // Verifica se está executando localmente com base em uma variável de ambiente
 const urlFatec1 =  
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_IP_LOCAL}/teste/fetec1/acervo`
-        : `${process.env.UNIBLI_IP}/teste/fetec1/acervo`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST_HTTP}/teste/fetec1/acervo`
+        : `${process.env.UNIBLI_SERVER_HTTP}/teste/fetec1/acervo`;
 
 const unibli_base_url = 
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_IP_LOCAL}/unibli`
-        : `${process.env.UNIBLI_IP}/unibli`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST_HTTP}/unibli`
+        : `${process.env.UNIBLI_SERVER_HTTP}/unibli`;
 /**********************************************************/
+
+
 
 module.exports = class UniBliService {
 
@@ -50,7 +52,7 @@ module.exports = class UniBliService {
     static async integraBases(req, res){
         let dataFatec1, dataFatec2;
         try {
-            const responseFatec1 = await fetch(`${urlFatec1}`)
+            const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
              dataFatec1 = await responseFatec1.json();
         }catch(err){
             console.log(err)
@@ -61,6 +63,7 @@ module.exports = class UniBliService {
         } catch(err){
             console.log(err)
         }
+
         const livros = [...dataFatec1, ...dataFatec2.items]
 
         return res.json(livros);  
@@ -70,7 +73,7 @@ module.exports = class UniBliService {
         const id = req.params.id
         
         try {
-            const response = await fetch(`${unibli_base_url}/acervo`);
+            const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
             const data = await response.json();
     
             const book = data.find(book => String(book._id || book.livro_id) === String(id));
