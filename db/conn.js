@@ -21,10 +21,10 @@ const sequelize = new Sequelize({
 //checka a conexão, como um "ping", mas não mantém/persiste nada no BD 
 sequelize.authenticate()
 .then(() => {
-console.log('Conexão bem-sucedida!');
+    console.log('Conexão bem-sucedida!');
 })
 .catch(err => {
-console.error('Erro ao conectar:', err);
+    console.error('Erro ao conectar:', err);
 });
 
 module.exports = sequelize
