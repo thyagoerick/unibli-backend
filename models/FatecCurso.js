@@ -8,9 +8,9 @@ const db = require('../db/conn')
 /** O método define define o módulo 
  *  define('NomeDoModulo.js', objDeDefinicaoDeTipos{})
  */
-const Fatec_Curso = db.define('Fatec_Curso', {
+const FatecCurso = db.define('FatecCurso', {
     
 })
 
 
-module.exports = Fatec_Curso
+module.exports = FatecCurso

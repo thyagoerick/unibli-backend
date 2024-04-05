@@ -9,6 +9,11 @@ const conn = require('./db/conn')
 /*****************IMPORT MODELS****************/
 // Obs.: só o fato delas estarem aqui quando rodar o projeto elas já são criadas.
 const Usuario = require('./models/Usuario')
+const Curso = require('./models/Curso')
+const Fatec = require('./models/Fatec')
+const FatecCurso = require('./models/FatecCurso')
+const Livro = require('./models/Livro')
+const Reserva = require('./models/Reserva')
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
@@ -34,7 +39,8 @@ app.use('/auth0', authRotas)
 /***********************************************/
 
 
-conn.sync()
+conn
+    .sync()
     .then(() => {
         app.listen(3307)
     }).catch(err => console.log(err))
