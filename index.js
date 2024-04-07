@@ -14,6 +14,8 @@ const Fatec = require('./models/Fatec')
 const FatecCurso = require('./models/FatecCurso')
 const Livro = require('./models/Livro')
 const Reserva = require('./models/Reserva')
+const LivroFatec = require('./models/LivroFatec')
+const LivroCurso = require('./models/LivroCurso')
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
