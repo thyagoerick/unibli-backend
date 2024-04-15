@@ -1,7 +1,12 @@
 // Import express
-const express = require('express')
-const app = express()
+const express = require('express');
+const fs = require('fs');
+const https = require('https');
+const http = require('http');
+const app = express();
 
+// Importar dotenv para carregar variáveis de ambiente locais
+require('dotenv').config();
 
 // Import do conn para conexão do Oracle com Sequelize
 const conn = require('./db/conn')
@@ -33,6 +38,24 @@ app.use(express.urlencoded({
 }))
 app.use(express.json()) //Obter o dado do body em json()
 
+// Se estiver em produção, usar HTTPS
+if (process.env.NODE_ENV === 'production') {
+    const options = {
+        key: fs.readFileSync('../ chave.key'),
+        cert: fs.readFileSync('../certificado.crt'),
+    };
+
+    const server = https.createServer(options, app);
+    server.listen(443, () => {
+        console.log('Servidor HTTPS iniciado na porta 443');
+    });
+} else { // Se estiver em ambiente de desenvolvimento, usar HTTP
+    const server = http.createServer(app);
+    server.listen(3307, () => {
+        console.log('Servidor HTTP iniciado na porta 3307');
+    });
+}
+
 
 app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
@@ -41,8 +64,10 @@ app.use('/auth0', authRotas)
 /***********************************************/
 
 
-conn
-    .sync()
+// Conexão com o banco de dados e sincronização dos modelos
+conn.sync()
     .then(() => {
-        app.listen(3307)
-    }).catch(err => console.log(err))
+        console.log('Conectado ao banco de dados e modelos sincronizados');
+    }).catch(err => {
+        console.error('Erro ao conectar e sincronizar modelos:', err);
+    });
