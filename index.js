@@ -41,8 +41,9 @@ app.use(express.json()) //Obter o dado do body em json()
 // Se estiver em produção, usar HTTPS
 if (process.env.NODE_ENV !== 'development') {
     const options = {
-        key: fs.readFileSync('../chave.key'),
-        cert: fs.readFileSync('../certificado.crt'),
+        key: fs.readFileSync('../chave.key', 'utf8'),
+        cert: fs.readFileSync('../certificado.crt', 'utf8'),
+        passphrase: `${process.env.OPENSSL_PASSPHRASE}`
     };
 
     const server = https.createServer(options, app);
