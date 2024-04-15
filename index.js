@@ -39,9 +39,9 @@ app.use(express.urlencoded({
 app.use(express.json()) //Obter o dado do body em json()
 
 // Se estiver em produção, usar HTTPS
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV !== 'development') {
     const options = {
-        key: fs.readFileSync('../ chave.key'),
+        key: fs.readFileSync('../chave.key'),
         cert: fs.readFileSync('../certificado.crt'),
     };
 
