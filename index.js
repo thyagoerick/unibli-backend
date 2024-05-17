@@ -39,7 +39,7 @@ app.use(express.urlencoded({
 app.use(express.json()) //Obter o dado do body em json()
 
 
-/* TENTATIVA DE FAZER USAR A PORTA HTTTPS
+/* TENTATIVA DE FAZER USAR A PORTA HTTTPS 
 // Se estiver em produção, usar HTTPS
 if (process.env.NODE_ENV !== 'development') {
 
@@ -62,8 +62,8 @@ if (process.env.NODE_ENV !== 'development') {
     server.listen(3307, () => {
         console.log('Servidor HTTP iniciado na porta 3307');
     });
-}*/
-
+}
+*/
 
 app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
@@ -73,6 +73,11 @@ app.use('/auth0', authRotas)
 
 
 // Conexão com o banco de dados e sincronização dos modelos
+const server = http.createServer(app);
+server.listen(3307, () => {
+    console.log('Servidor HTTP iniciado na porta 3307');
+});
+
 conn.sync()
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');

@@ -1,7 +1,6 @@
 require('dotenv').config();
 
-const whitelist = [
-        
+const whitelist = [    
     process.env.UNIBLI_SERVER_LOCALHOST_HTTP,
     process.env.UNIBLI_SERVER_LOCALHOST_HTTPS,
     process.env.UNIBLI_SERVER_HTTP,
