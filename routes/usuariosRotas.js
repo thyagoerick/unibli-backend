@@ -6,17 +6,17 @@ const corsOptions = require('../config/corsConfig')
 
 const UsuarioController = require('../controllers/UsuarioController')
 
-router.get('/', cors(corsOptions), UsuarioController.listarUsuarios)
+router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
 // pega para o /usuarios/ === /usuarios
 
-router.post('/cadastrar', cors(corsOptions), UsuarioController.cadastrarUsuario)
+router.post('/cadastrar', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
 
 
 
 
 
 
-/**************************************************************************************/
+/**************************************************************************************
 router.use((err, req, res, next) => {
     if (err) {
         if (err === 403) {

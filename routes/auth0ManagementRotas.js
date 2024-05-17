@@ -6,10 +6,10 @@ const corsOptions = require('../config/corsConfig')
 
 const Auth0ManagementService = require('../services/Auth0ManagementService');
 
-router.get('/token', cors(corsOptions), Auth0ManagementService.getToken);
+router.get('/token', /*cors(corsOptions),*/ Auth0ManagementService.getToken);
 
 
-/**************************************************************************************/
+/**************************************************************************************
 router.use((err, req, res, next) => {
     if (err) {
         if (err === 403) {

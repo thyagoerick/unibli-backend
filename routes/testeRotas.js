@@ -9,14 +9,14 @@ const FatecBService = require('../services/FatecBService')
 
 
 
-router.get('/fetec1/acervo', cors(corsOptions), FatecAService.listaAcervoFatec)
-router.get('/fetec1/acervo/:id', cors(corsOptions), FatecAService.buscaLivroPorId)
+router.get('/fetec1/acervo', /*cors(corsOptions),*/ FatecAService.listaAcervoFatec)
+router.get('/fetec1/acervo/:id', /*cors(corsOptions),*/ FatecAService.buscaLivroPorId)
 
-router.get('/fetec2/acervo', cors(corsOptions), FatecBService.listaAcervoFatec)
-router.get('/fetec2/acervo/:id', cors(corsOptions), FatecBService.buscaLivroPorId)
+router.get('/fetec2/acervo', /*cors(corsOptions),*/ FatecBService.listaAcervoFatec)
+router.get('/fetec2/acervo/:id', /*cors(corsOptions),*/ FatecBService.buscaLivroPorId)
 
 
-/**************************************************************************************/
+/**************************************************************************************
 router.use((err, req, res, next) => {
     if (err) {
         if (err === 403) {
