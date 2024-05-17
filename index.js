@@ -4,6 +4,7 @@ const fs = require('fs');
 const https = require('https');
 const http = require('http');
 const app = express();
+const cors = require('cors');
 
 // Importar dotenv para carregar variáveis de ambiente locais
 require('dotenv').config();
@@ -38,6 +39,7 @@ app.use(express.urlencoded({
 }))
 app.use(express.json()) //Obter o dado do body em json()
 
+app.use(cors());
 
 /* TENTATIVA DE FAZER USAR A PORTA HTTTPS 
 // Se estiver em produção, usar HTTPS
