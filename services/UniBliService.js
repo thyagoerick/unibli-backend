@@ -51,20 +51,21 @@ module.exports = class UniBliService {
 
     static async integraBases(req, res){
         let dataFatec1, dataFatec2;
+        const livros = []
         try {
             const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
              dataFatec1 = await responseFatec1.json();
+             livros.push(...dataFatec1)
         }catch(err){
             console.log(err)
         }
         try {
             const responseFatec2 = await fetch(`${urlFatec2}`)
              dataFatec2 = await responseFatec2.json();
+             livros.push(...dataFatec2.items)
         } catch(err){
             console.log(err)
         }
-
-        const livros = [...dataFatec1, ...dataFatec2.items]
 
         return res.json(livros);  
     }
