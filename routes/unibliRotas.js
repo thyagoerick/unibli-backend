@@ -7,12 +7,12 @@ const corsOptions = require('../config/corsConfig')
 const UniBliService = require('../services/UniBliService')
 
 
-router.get('/acervo', cors(corsOptions), UniBliService.integraBases)
-router.get('/acervo/:id', cors(corsOptions), UniBliService.buscaLivroPorId)
+router.get('/acervo', /*cors(corsOptions),*/ UniBliService.integraBases)
+router.get('/acervo/:id', /*cors(corsOptions),*/ UniBliService.buscaLivroPorId)
 
 
 
-/**************************************************************************************/
+/**************************************************************************************
 router.use((err, req, res, next) => {
     if (err) {
         if (err === 403) {
