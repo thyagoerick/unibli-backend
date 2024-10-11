@@ -7,7 +7,7 @@ module.exports = {
     },
 
     async cadastrarCurso(nome) {
-        return await Curso.create({nome})
+        return await Curso.create({ nome })
     },
     async atualizarCurso(id, dadosAtualizados) {
         try {
