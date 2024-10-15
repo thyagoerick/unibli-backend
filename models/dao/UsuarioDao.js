@@ -9,6 +9,7 @@ module.exports = {
 
     // Método assíncrono para cadastrar um novo usuário
     async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario) {
+        
         // Cria um novo usuário no banco de dados com os dados fornecidos
         return await Usuario.create({
             nome,

@@ -63,6 +63,9 @@ const Usuario = db.define('Usuario', {
 
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        set(value) {
+            this.setDataValue('tipoBibliotecario', value != null ? value : false);
+        }
     },
 })
 
