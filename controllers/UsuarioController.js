@@ -10,11 +10,16 @@ module.exports = class UsuarioController {
     }
 
     static async cadastrarUsuario(req, res) {
-        if (!req.body || !req.body.nome) {
-            return res.status(400).json({ error: 'Nome não fornecido na requisição' });
+        const { nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario } = req.body;
+
+        if (!nome || !cpf || !endereco || !numResidencia || !cep || !telefone || !email || !ra || !matricula) {
+            return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
         }
-    
-        const nome = req.body.nome;
-        await usuarioDao.cadastrarUsuario(nome);
+        try {
+            await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario);
+            res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
+        } catch (error) {
+            res.status(500).json({ error: 'Erro ao cadastrar usuário' });
+        }
     }
 }

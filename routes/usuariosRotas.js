@@ -9,10 +9,12 @@ const UsuarioController = require('../controllers/UsuarioController')
 router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
 // pega para o /usuarios/ === /usuarios
 
-router.post('/cadastrar', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
+router.post('/cadastrar/user', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
+// Cadastro de usuasrio
 
 
-
+router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
+// Editar usuario no banco Unibli
 
 
 
