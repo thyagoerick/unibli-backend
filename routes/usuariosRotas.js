@@ -13,7 +13,7 @@ router.post('/cadastrar/user', /*cors(corsOptions),*/ UsuarioController.cadastra
 // Cadastro de usuasrio
 
 
-router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
+//router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
 // Editar usuario no banco Unibli
 
 
