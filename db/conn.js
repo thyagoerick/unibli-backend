@@ -11,8 +11,8 @@ const {
 
 const sequelize = new Sequelize({
     dialect: `${SEQUELIZE_DIALECT}`,
-    username: `ADMIN`/*${OCI_ADB_USER_NAME}*/,
-    password: `UnibliFatec123`/*${OCI_ADB_PASSWORD}*/,
+    username: `${OCI_ADB_USER_NAME}`,
+    password: `${OCI_ADB_PASSWORD}`,
     dialectOptions:{
         connectString: `${OCI_ADB_CONNECT_STR}`
     }
