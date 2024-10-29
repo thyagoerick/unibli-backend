@@ -75,9 +75,10 @@ app.use('/auth0', authRotas)
 
 
 // Conexão com o banco de dados e sincronização dos modelos
+const PORT = process.env.PORT; //3307
 const server = http.createServer(app);
-server.listen(3307, () => {
-    console.log('Servidor HTTP iniciado na porta 3307');
+server.listen(PORT, () => {
+    console.log(`Servidor HTTP iniciado na porta ${PORT}`);
 });
 
 conn.sync()
