@@ -15,14 +15,17 @@ try {
         
     })
     
-} catch(e){console.log(`Erro ao conectar com o MongoDB: ${e}`)}
+} catch(e){
+    console.log(`Erro ao conectar com o MongoDB: ${e}`)
+}
 
 
 module.exports = class FatecAService{
 
     static async listaAcervoFatec(req, res){
         try {
-            const livros = await acervo.db(`${MONGO_NAME_COLLECTION}`).collection('acervo').find().toArray() // Chamo a conexão, indico o banco, a colection 
+            //fatecA = `${MONGO_NAME_COLLECTION}`
+            const livros = await acervo.db('fatecA').collection('acervo').find().toArray() // Chamo a conexão, indico o banco, a colection 
             //console.log(livros);
             return res.json(livros); // Vai no banco em cima e retornar os dados localizados
         } catch(err) {
