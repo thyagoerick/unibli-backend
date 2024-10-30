@@ -1,15 +1,10 @@
 require('dotenv').config();
 
 const whitelist = [    
-    process.env.UNIBLI_SERVER_LOCALHOST_HTTP,
-    process.env.UNIBLI_SERVER_LOCALHOST_HTTPS,
-    process.env.UNIBLI_SERVER_HTTP,
+    process.env.UNIBLI_SERVER_LOCALHOST,
     process.env.UNIBLI_SERVER_HTTPS,
-    process.env.UNIBLI_FRONT_LOCALHOST_HTTP,
-    process.env.UNIBLI_FRONT_LOCALHOST_HTTPS,
+    process.env.UNIBLI_FRONT_LOCALHOST,
     process.env.UNIBLI_FRONT_HTTPS,
-    process.env.UNIBLI_FRONT_HTTP
-
 ];
 
 const corsOptions = {
