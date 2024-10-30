@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const origin = (process.env.NODE_ENV === 'development') ? process.env.UNIBLI_SERVER_LOCALHOST_HTTP : process.env.UNIBLI_SERVER_HTTP
+const origin = (process.env.NODE_ENV === 'development') ? process.env.UNIBLI_SERVER_LOCALHOST : process.env.UNIBLI_SERVER_HTTP
 
 const requestOptionsGET = {
     method: 'GET',

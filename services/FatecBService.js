@@ -8,6 +8,7 @@ module.exports = class FatecBService {
     static async listaAcervoFatec(req, res) {
         try {
             const response = await fetch(`${BASE_URL_FATEC2}/livro`)
+
             const data = await response.json()
             const livros = data.items
             //console.log(livros);
