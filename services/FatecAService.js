@@ -2,13 +2,18 @@ require('dotenv').config()
 const {MongoClient, ObjectId} = require('mongodb')
 
 const {
-    MONGO_BASE_CONNECT_URI,
+    MONGO_NAME_COLLECTION,
+    MONGO_BASE_CONNECT_URI
 } = process.env
 
 // Instancia um objeto de cliente para o a collection de acervo no Mongo
 const acervo = new MongoClient(`${MONGO_BASE_CONNECT_URI}`)
 try {
-    acervo.connect().then(() => console.log("Conectado com o MongoDB"))
+    acervo.connect().then(() => {
+        console.log("Conectado com o MongoDB")
+        console.log(MONGO_NAME_COLLECTION);
+        
+    })
     
 } catch(e){console.log(`Erro ao conectar com o MongoDB: ${e}`)}
 
@@ -17,7 +22,7 @@ module.exports = class FatecAService{
 
     static async listaAcervoFatec(req, res){
         try {
-            const livros = await acervo.db('fatec1').collection('acervo').find().toArray() // Chamo a conexão, indico o banco, a colection 
+            const livros = await acervo.db(`${MONGO_NAME_COLLECTION}`).collection('acervo').find().toArray() // Chamo a conexão, indico o banco, a colection 
             //console.log(livros);
             return res.json(livros); // Vai no banco em cima e retornar os dados localizados
         } catch(err) {

@@ -7,13 +7,13 @@ const urlFatec2 = `${process.env.OCI_BASE_URL_FATEC2}/livro`
 // Verifica se está executando localmente com base em uma variável de ambiente
 const urlFatec1 =  
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_SERVER_LOCALHOST_HTTP}/teste/fetec1/acervo`
-        : `${process.env.UNIBLI_SERVER_HTTP}/teste/fetec1/acervo`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/teste/fatec1/acervo`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/teste/fatec1/acervo`;
 
 const unibli_base_url = 
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_SERVER_LOCALHOST_HTTP}/unibli`
-        : `${process.env.UNIBLI_SERVER_HTTP}/unibli`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/unibli`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/unibli`;
 /**********************************************************/
 
 
@@ -51,6 +51,9 @@ module.exports = class UniBliService {
 
     static async integraBases(req, res){
         let dataFatec1, dataFatec2;
+
+        
+
         const livros = []
         try {
             const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
