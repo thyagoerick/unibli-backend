@@ -51,28 +51,48 @@ module.exports = class UniBliService {
 
     static async integraBases(req, res){
         let dataFatec1, dataFatec2;
+        let livros = []
 
-        
-
-        const livros = []
         try {
             const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
              dataFatec1 = await responseFatec1.json();
              livros.push(...dataFatec1)
         }catch(err){
-            console.log(err)
+            console.error('Erro ao buscar acervo da Fatec1:', err);
         }
         try {
             const responseFatec2 = await fetch(`${urlFatec2}`)
              dataFatec2 = await responseFatec2.json();
              livros.push(...dataFatec2.items)
         } catch(err){
-            console.log(err)
+            console.error('Erro ao buscar acervo da Fatec2:', err);
         }
 
-        return res.json(livros);  
+
+        //----------------------------------------------------------------------
+        //Não mexer aqui, só em cima que mexe agora
+
+        // Captura os parâmetros da query
+        const { titulo } = req.query;
+        console.log('Query recebida (req.query):', req.query);
+        console.log('Livros recebidos (livros):', livros);
+        console.log('Título da query (titulo):', titulo);
+
+        // Filtragem local dos livros
+        if(titulo){
+            const livrosFiltrados = livros.filter(livro =>
+               livro.titulo.toLowerCase().includes(titulo.toLowerCase())
+            );
+            return res.json(livrosFiltrados);
+        }else{
+            return res.json(livros);
+        }
     }
 
+
+
+
+    
     static async buscaLivroPorId(req, res){
         const id = req.params.id
         
@@ -90,4 +110,21 @@ module.exports = class UniBliService {
         }
     }
 
+
+    static async buscaLivroPor(req, res){
+        const id = req.params.id
+        
+        try {
+            const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
+            const data = await response.json();
+    
+            const book = data.find(book => String(book._id || book.livro_id) === String(id));
+    
+            book ? res.json(book) : res.status(404).json({ message: "Livro não encontrado" });
+
+        } catch (error) {
+            console.error('Erro ao buscar livro por ID:', error);
+            res.status(500).json({ message: "Erro interno do servidor" });
+        }
+    }
 }

@@ -19,7 +19,7 @@ const Fatec = db.define('Fatec', {
         allowNull: false,
     },
     cep:{
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     }
 })

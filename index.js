@@ -55,9 +55,11 @@ server.listen(PORT, () => {
     console.log(`Servidor HTTP iniciado na porta ${PORT}`);
 });
 
-conn.sync()
+conn
+    .sync()
+    //.sync({force: true})
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');
-    }).catch(err => {
+    }).catch(err => {   
         console.error('Erro ao conectar e sincronizar modelos:', err);
     });

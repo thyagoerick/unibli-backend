@@ -7,9 +7,12 @@ module.exports = {
         return await Usuario.findAll({ raw: true })
     },
 
+    async buscaUsuarioPorId(auth0UserId){
+        return await Usuario.findOne({ raw: true, where: {auth0UserId: auth0UserId}})
+    },
+
     // Método assíncrono para cadastrar um novo usuário
-    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario) {
-        
+    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, FatecId) {
         // Cria um novo usuário no banco de dados com os dados fornecidos
         return await Usuario.create({
             nome,
@@ -22,7 +25,10 @@ module.exports = {
             email,
             ra,
             matricula,
-            tipoBibliotecario
+            tipoBibliotecario,
+            auth0UserId,
+            rg,
+            FatecId
         })
     },
 
