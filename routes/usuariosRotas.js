@@ -9,6 +9,9 @@ const UsuarioController = require('../controllers/UsuarioController')
 router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
 // pega para o /usuarios/ === /usuarios
 
+router.get('/user/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorId)
+
+
 router.post('/cadastrar/user', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
 // Cadastro de usuasrio
 
