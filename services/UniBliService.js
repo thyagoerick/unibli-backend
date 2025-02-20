@@ -69,13 +69,16 @@ module.exports = class UniBliService {
         }
 
 
+        // CRIAR A PARTE DA VERDADEIRA INTEGRAÇÃO AQUI HÉLIO
+
+
         //----------------------------------------------------------------------
         //Não mexer aqui, só em cima que mexe agora
 
         // Captura os parâmetros da query
         const { titulo } = req.query;
         console.log('Query recebida (req.query):', req.query);
-        console.log('Livros recebidos (livros):', livros);
+        //console.log('Livros recebidos (livros):', livros);
         console.log('Título da query (titulo):', titulo);
 
         // Filtragem local dos livros
