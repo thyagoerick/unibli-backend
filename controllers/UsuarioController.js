@@ -12,16 +12,20 @@ module.exports = class UsuarioController {
     static async cadastrarUsuario(req, res) {
         const { nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo} = req.body;
         
+        console.log('(A) req.body',req.body)
+
         // Alterar o valor de unidadePolo para 1 se for vazio ou null, e 2 caso contrário
-        const FatecId = unidadePolo === null || unidadePolo === '' ? 1 : 2;
+        const fatecId = (unidadePolo === null || unidadePolo === '') ? 1 : 2;
+        console.log('(B) fatecId', fatecId);
         
-        console.log('req.body',req.body)
+
+        
 
         if (!nome || !cpf || !endereco || !numResidencia || !cep || !telefone || !email || !ra || !auth0UserId || !rg/*|| !matricula*/) {
             return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
         }
         try {
-            await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, FatecId);
+            await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, fatecId);
             res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
         } catch (error) {
             console.error('Erro ao cadastrar usuário:', error); // Exibe o erro completo no console

@@ -24,5 +24,4 @@ const Fatec = db.define('Fatec', {
     }
 })
 
-
 module.exports = Fatec
