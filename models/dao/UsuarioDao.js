@@ -12,8 +12,13 @@ module.exports = {
     },
 
     // Método assíncrono para cadastrar um novo usuário
-    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, FatecId) {
+    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo) {
         // Cria um novo usuário no banco de dados com os dados fornecidos
+
+
+        console.log(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo);
+        
+
         return await Usuario.create({
             nome,
             cpf,
@@ -28,7 +33,7 @@ module.exports = {
             tipoBibliotecario,
             auth0UserId,
             rg,
-            FatecId
+            fk_id_fatec:unidadePolo //fk_id_fatec
         })
     },
 

@@ -56,8 +56,9 @@ server.listen(PORT, () => {
 });
 
 conn
-    .sync()
-    //.sync({force: true})
+    //.sync()
+    .sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS
+    //.sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');
     }).catch(err => {   
