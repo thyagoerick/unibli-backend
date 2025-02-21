@@ -93,6 +93,6 @@ const Usuario = db.define(
     }
 )
 
-Usuario.belongsTo(Fatec)
+Usuario.belongsTo(Fatec, {foreignKey:'fk_id_fatec'})
 
 module.exports = Usuario

@@ -49,6 +49,31 @@ module.exports = class UniBliService {
         }, intervaloDeTempo);
     }
 
+    static async transformarDadosAcervo(fatec) {
+        
+
+
+
+
+
+
+
+        const modeloLivro = {
+            //isbn10: '',
+            //isbn13: '',
+            titulo: '',
+            subTitulo: '',
+            autor: '',
+            genero: '',
+            edicao: '',
+            descricao: '',
+            quantidadePaginas: '',
+            volume: '',
+            editora: '',
+            idioma: ''
+        };
+    }
+
     static async integraBases(req, res){
         let dataFatec1, dataFatec2;
         let livros = []
@@ -60,6 +85,7 @@ module.exports = class UniBliService {
         }catch(err){
             console.error('Erro ao buscar acervo da Fatec1:', err);
         }
+
         try {
             const responseFatec2 = await fetch(`${urlFatec2}`)
              dataFatec2 = await responseFatec2.json();
@@ -69,8 +95,7 @@ module.exports = class UniBliService {
         }
 
 
-        // CRIAR A PARTE DA VERDADEIRA INTEGRAÇÃO AQUI HÉLIO
-
+        
 
         //----------------------------------------------------------------------
         //Não mexer aqui, só em cima que mexe agora
@@ -112,22 +137,5 @@ module.exports = class UniBliService {
             res.status(500).json({ message: "Erro interno do servidor" });
         }
     }
-
-
-    static async buscaLivroPor(req, res){
-        const id = req.params.id
-        
-        try {
-            const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
-            const data = await response.json();
     
-            const book = data.find(book => String(book._id || book.livro_id) === String(id));
-    
-            book ? res.json(book) : res.status(404).json({ message: "Livro não encontrado" });
-
-        } catch (error) {
-            console.error('Erro ao buscar livro por ID:', error);
-            res.status(500).json({ message: "Erro interno do servidor" });
-        }
-    }
 }
