@@ -14,12 +14,15 @@ const conn = require('./db/conn')
 
 /*****************IMPORT MODELS****************/
 // Obs.: só o fato delas estarem aqui quando rodar o projeto elas já são criadas.
-const Usuario = require('./models/Usuario')
-const Curso = require('./models/Curso')
-const Fatec = require('./models/Fatec')
+const { Usuario, Fatec, Livro, Reserva } = require('./models/associations/associations');
+
+// const Reserva = require('./models/Reserva')
+// const Usuario = require('./models/Usuario')
+// const Fatec = require('./models/Fatec')
+// const Livro = require('./models/Livro')
+
 const FatecCurso = require('./models/FatecCurso')
-const Livro = require('./models/Livro')
-const Reserva = require('./models/Reserva')
+const Curso = require('./models/Curso')
 const LivroFatec = require('./models/LivroFatec')
 const LivroCurso = require('./models/LivroCurso')
 /**********************************************/
@@ -56,8 +59,8 @@ server.listen(PORT, () => {
 });
 
 conn
-    //.sync()
-    .sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS
+    .sync()
+    //.sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS
     //.sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');

@@ -8,9 +8,19 @@ const db = require('../db/conn')
 /** O método define define o módulo 
  *  define('NomeDoModulo.js', objDeDefinicaoDeTipos{})
  */
-const FatecCurso = db.define('FatecCurso', {
-    
-})
+const FatecCurso = db.define('FatecCurso', 
+    {
+        id_fatec_curso: { 
+            type: DataTypes.INTEGER,
+            primaryKey: true, 
+            autoIncrement: true,
+            allowNull: false
+        },
+    },
+    {
+        tableName: 'Fatecs_Cursos' // Define o nome real da tabela no banco
+    }
+)
 
 
 module.exports = FatecCurso

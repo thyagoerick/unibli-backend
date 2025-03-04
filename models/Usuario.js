@@ -4,7 +4,9 @@ const { DataTypes } = require('sequelize')
 // Chama a conexão do banco porque aqui teremos uma operação com o banco, já na definição do model
 const db = require('../db/conn')
 
-const Fatec = require('./Fatec')
+const Fatec = require('./Fatec');
+const Livro = require('./Livro');
+const Reserva = require('./Reserva');
 
 
 //Criação da classe/model
@@ -14,6 +16,12 @@ const Fatec = require('./Fatec')
 const Usuario = db.define(
     'Usuario', 
     {
+        id_usuario: { 
+            type: DataTypes.INTEGER,
+            primaryKey: true, // Define como chave primária
+            autoIncrement: true, // Mantém a geração automática do ID
+            allowNull: false
+        },
         nome: {
             //Não precisa definir o attr id, pois ele é criado automaticamente
             type: DataTypes.STRING,
@@ -84,7 +92,7 @@ const Usuario = db.define(
     },
     {
         indexes: [
-          // Create a unique index on email
+          // Create a unique index
           {
             unique: true,
             fields: ['auth0UserId'],
@@ -93,11 +101,6 @@ const Usuario = db.define(
     }
 )
 
-Usuario.belongsTo(Fatec, {
-    foreignKey: {
-        name: 'fk_id_fatec',
-        allowNull: false,
-    },
-});
+// Associações envolvendo Usuario estão em associations.js
 
 module.exports = Usuario
