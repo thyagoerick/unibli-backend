@@ -8,13 +8,21 @@ const db = require('../db/conn')
 /** O método define define o módulo 
  *  define('NomeDoModulo.js', objDeDefinicaoDeTipos{})
  */
-const Reserva = db.define('Reserva', {
-    dataDaReserva:{
-        //Não precisa definir o attr id, pois ele é criado automaticamente
-        type: DataTypes.DATE,
-        allowNull: false, //NotNull (aceita string vazia)
+const Reserva = db.define('Reserva', 
+    {
+        id_reserva: { 
+            type: DataTypes.INTEGER,
+            primaryKey: true, 
+            autoIncrement: true,
+            allowNull: false
+        },
+        dataDaReserva:{
+            //Não precisa definir o attr id, pois ele é criado automaticamente
+            type: DataTypes.DATE,
+            allowNull: false, //NotNull (aceita string vazia)
+        }
     }
-})
+)
 
 
 module.exports = Reserva

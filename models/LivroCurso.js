@@ -8,9 +8,19 @@ const db = require('../db/conn')
 /** O método define define o módulo 
  *  define('NomeDoModulo.js', objDeDefinicaoDeTipos{})
  */
-const LivroCurso = db.define('LivroCurso', {
-    
-})
+const LivroCurso = db.define('LivroCurso', 
+    {
+        id_livro_curso: { 
+            type: DataTypes.INTEGER,
+            primaryKey: true, 
+            autoIncrement: true,
+            allowNull: false
+        },
+    },
+    {
+        tableName: 'Livros_Cursos' // Define o nome real da tabela no banco
+    }
+)
 
 
 module.exports = LivroCurso
