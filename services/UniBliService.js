@@ -1,4 +1,7 @@
 require('dotenv').config()
+
+const Livro = require('../models/Livro')
+
 const FatecAService = require('./FatecAService')
 const  { requestOptionsGET } = require('../config/requestOptions')
 
@@ -20,8 +23,98 @@ const unibli_base_url =
 
 module.exports = class UniBliService {
 
-    // Função para buscar dados periodicamente
-    static async atualizaUnibli() {
+    static async buscarEditoraFateB(editoraId){
+        const resp = await fetch(`https://g4cd95dfc23d355-fatecb.adb.sa-saopaulo-1.oraclecloudapps.com/ords/admin/editora/${editoraId}`)
+        const editora = await resp.json();  
+        return editora;
+    }
+
+    static async transformarDadosAcervo(livros) {        
+        const structAcervo =  await Promise.all( // faz o map esperar que todas as promissese sejam resolvidas
+                livros?.map( async livro => // torna a função dentro do map assincrona
+            {   
+                let editoraFateB = livro?.fk_editora_editora_id ? await UniBliService.buscarEditoraFateB(livro?.fk_editora_editora_id) : null;      
+
+                let isbn = String(livro?.isbn).replaceAll('-','');
+                let isbn13fatecA;
+                let isbn10fatecA;
+
+                livro?.isbn 
+                    && (
+                        isbn13fatecA = isbn.length === 13 &&  String(isbn),
+                        isbn10fatecA = isbn.length === 10 &&  String(isbn)
+                    )
+             
+                let isbn10fatecB = livro?.isbn_10 && String(livro?.isbn_10);
+                let isbn13fatecB = livro?.isbn_13 && String(livro?.isbn_13);
+
+                let imagemFatecA = String(livro?.imageLinks).includes('http') && livro?.imageLinks;
+                let imagemFatecB = String(livro?.imagem_link).includes('http') && livro?.imagem_link;
+
+                const structLivro = {
+                    isbn10: isbn10fatecA || isbn10fatecB || null,
+                    isbn13: isbn13fatecA || isbn13fatecB || null,
+                    titulo: livro?.titulo || null,
+                    autor: livro?.autor || null,
+                    genero: livro?.genero || null,
+                    edicao: livro?.edicao || null,
+                    descricao: livro?.descricao || null,
+                    quantidadePaginas: livro?.numero_pagina || livro?.numeroPagina || null,
+                    editora: livro?.editora || editoraFateB?.nome_editora || null,
+                    idioma: livro?.idioma || null,
+                    quantidadeLivro: livro?.quantidade_livro || livro?.quantidadeLivro || 1,
+                    disponibilidadeLivro: null,
+                    imagem: imagemFatecA || imagemFatecB || null,
+                    fatec: livro?.fatec || null
+                };
+                return structLivro;
+        }));
+        return structAcervo;
+    }
+
+    static async integraBases(){
+        
+        let dataFatec1, dataFatec2;
+        let livros = []
+
+        try {
+            const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
+             dataFatec1 = await responseFatec1.json();
+             
+             const acervofatec1 = dataFatec1?.map(data => {
+                return {...data, fatec: 1}
+             })
+             livros.push(...acervofatec1)
+        }catch(err){
+            console.error('Erro ao buscar acervo da Fatec1:', err);
+        }
+
+        try {
+            const responseFatec2 = await fetch(`${urlFatec2}`)
+             dataFatec2 = await responseFatec2.json();
+             const acervofatec2 = dataFatec2?.items?.map(data => {
+                return {...data, fatec: 2}
+             })
+
+             livros.push(...acervofatec2)
+        } catch(err){
+            console.error('Erro ao buscar acervo da Fatec2:', err);
+        }
+        
+        const basesAcervosIntegradas = await UniBliService.transformarDadosAcervo(livros)
+        
+        return basesAcervosIntegradas;
+    }
+
+
+
+
+
+
+
+
+     // Função para buscar dados periodicamente
+     static async atualizaUnibli() {
         // Defino o intervalo de tempo em milissegundos (por exemplo, a cada 5 minutos)
         const intervaloDeTempo = 5 * 60 * 1000;
 
@@ -49,81 +142,13 @@ module.exports = class UniBliService {
         }, intervaloDeTempo);
     }
 
-    static async transformarDadosAcervo(fatec) {
-        
 
 
 
 
 
-
-
-        const modeloLivro = {
-            //isbn10: '',
-            //isbn13: '',
-            titulo: '',
-            subTitulo: '',
-            autor: '',
-            genero: '',
-            edicao: '',
-            descricao: '',
-            quantidadePaginas: '',
-            volume: '',
-            editora: '',
-            idioma: ''
-        };
-    }
-
-    static async integraBases(req, res){
-        let dataFatec1, dataFatec2;
-        let livros = []
-
-        try {
-            const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
-             dataFatec1 = await responseFatec1.json();
-             livros.push(...dataFatec1)
-        }catch(err){
-            console.error('Erro ao buscar acervo da Fatec1:', err);
-        }
-
-        try {
-            const responseFatec2 = await fetch(`${urlFatec2}`)
-             dataFatec2 = await responseFatec2.json();
-             livros.push(...dataFatec2.items)
-        } catch(err){
-            console.error('Erro ao buscar acervo da Fatec2:', err);
-        }
-
-
-        
-
-        //----------------------------------------------------------------------
-        //Não mexer aqui, só em cima que mexe agora
-
-        // Captura os parâmetros da query
-        const { titulo } = req.query;
-        console.log('Query recebida (req.query):', req.query);
-        //console.log('Livros recebidos (livros):', livros);
-        console.log('Título da query (titulo):', titulo);
-
-        // Filtragem local dos livros
-        if(titulo){
-            const livrosFiltrados = livros.filter(livro =>
-               livro.titulo.toLowerCase().includes(titulo.toLowerCase())
-            );
-            return res.json(livrosFiltrados);
-        }else{
-            return res.json(livros);
-        }
-    }
-
-
-
-
-    
     static async buscaLivroPorId(req, res){
-        const id = req.params.id
-        
+        const id = req.params.id   
         try {
             const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
             const data = await response.json();

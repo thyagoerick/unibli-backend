@@ -102,4 +102,4 @@ Curso.belongsToMany(Livro, {
 //-------------------------------------------------------------
 
 
-module.exports = { Usuario, Fatec, Livro, Reserva };
+module.exports = { Usuario, Reserva, LivroFatec, LivroCurso, Livro, FatecCurso, Fatec, Curso };
