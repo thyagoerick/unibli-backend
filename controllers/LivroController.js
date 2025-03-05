@@ -45,12 +45,15 @@ module.exports = class LivroController {
                         livro?.quantidadePaginas,
                         livro?.editora,
                         livro?.idioma,
+                        livro?.quantidadeLivro,
+                        livro?.disponibilidadeLivro,
+                        livro?.imagem,
                         { transaction: t } // Passa a transação como opção
                     );
-    
+                    
                     // Associa o livro à Fatec dentro da transação
-                    if (livro.fatec) {
-                        await livroCadastrado.addFatecs(livro.fatec, {
+                    if (livro?.fatec) {
+                        await livroCadastrado.addFatecs(livro?.fatec, {
                             through: { quantidadeLivro: livro?.quantidadeLivro || 1 }, // Define quantidadeLivro
                             transaction: t // Passa a transação como opção
                         });
@@ -70,5 +73,12 @@ module.exports = class LivroController {
         }
     }
 
+
+    static async buscaLivroPorId (req, res) {
+            console.log('Rota [acervo/] livro/:id chamada com ID:', req.params.id);
+            const livroId = req.params.id;
+            const livro = await livroDao.buscaLivroPorId(livroId);
+            res.json({livro});
+        }
 
 }

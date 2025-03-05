@@ -49,15 +49,29 @@ const Livro = db.define('Livro',
             type: DataTypes.TEXT,
             allowNull: true
         },
-        quantidadePaginas: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
         editora: {
             type: DataTypes.STRING,
             allowNull: true
         },
         idioma: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        quantidadePaginas: {
+            type: DataTypes.INTEGER,
+            allowNull: true
+        },
+        quantidadeLivro:{
+            //Não precisa definir o attr id, pois ele é criado automaticamente
+            type: DataTypes.INTEGER,
+            allowNull: true, //NotNull (aceita string vazia)
+        },
+        disponibilidadeLivro:{
+            //Não precisa definir o attr id, pois ele é criado automaticamente
+            type: DataTypes.INTEGER,
+            allowNull: true, //NotNull (aceita string vazia)
+        },
+        imagem: {
             type: DataTypes.STRING,
             allowNull: true
         },

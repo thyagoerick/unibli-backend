@@ -23,40 +23,9 @@ const unibli_base_url =
 
 module.exports = class UniBliService {
 
-    // Função para buscar dados periodicamente
-    static async atualizaUnibli() {
-        // Defino o intervalo de tempo em milissegundos (por exemplo, a cada 5 minutos)
-        const intervaloDeTempo = 5 * 60 * 1000;
-
-        // Chamo a função de busca de dados
-        FatecAService.listaAcervoFatecA()
-            .then(livros => {
-                console.log('Dados encontrados:', livros);
-                // Posso atualizar o banco Unibli aqui
-            })
-            .catch(error => {
-                console.error('Erro ao buscar dados:', error);
-                // Trate o erro aqui
-            });
-
-        // Agenda a execução da função de busca a cada intervalo de tempo
-        setInterval(async () => {
-            try {
-                const livros = await buscaFatecA();
-                console.log('Dados encontrados:', livros);
-                // Posso atualizar o banco Unibli aqui
-            } catch (error) {
-                console.error('Erro ao buscar dados periodicamente:', error);
-                // Trate o erro aqui
-            }
-        }, intervaloDeTempo);
-    }
-
-
     static async buscarEditoraFateB(editoraId){
         const resp = await fetch(`https://g4cd95dfc23d355-fatecb.adb.sa-saopaulo-1.oraclecloudapps.com/ords/admin/editora/${editoraId}`)
-        const editora = await resp.json();
-        
+        const editora = await resp.json();  
         return editora;
     }
 
@@ -79,6 +48,9 @@ module.exports = class UniBliService {
                 let isbn10fatecB = livro?.isbn_10 && String(livro?.isbn_10);
                 let isbn13fatecB = livro?.isbn_13 && String(livro?.isbn_13);
 
+                let imagemFatecA = String(livro?.imageLinks).includes('http') && livro?.imageLinks;
+                let imagemFatecB = String(livro?.imagem_link).includes('http') && livro?.imagem_link;
+
                 const structLivro = {
                     isbn10: isbn10fatecA || isbn10fatecB || null,
                     isbn13: isbn13fatecA || isbn13fatecB || null,
@@ -90,6 +62,9 @@ module.exports = class UniBliService {
                     quantidadePaginas: livro?.numero_pagina || livro?.numeroPagina || null,
                     editora: livro?.editora || editoraFateB?.nome_editora || null,
                     idioma: livro?.idioma || null,
+                    quantidadeLivro: livro?.quantidade_livro || livro?.quantidadeLivro || 1,
+                    disponibilidadeLivro: null,
+                    imagem: imagemFatecA || imagemFatecB || null,
                     fatec: livro?.fatec || null
                 };
                 return structLivro;
@@ -134,10 +109,46 @@ module.exports = class UniBliService {
 
 
 
-    
+
+
+
+
+     // Função para buscar dados periodicamente
+     static async atualizaUnibli() {
+        // Defino o intervalo de tempo em milissegundos (por exemplo, a cada 5 minutos)
+        const intervaloDeTempo = 5 * 60 * 1000;
+
+        // Chamo a função de busca de dados
+        FatecAService.listaAcervoFatecA()
+            .then(livros => {
+                console.log('Dados encontrados:', livros);
+                // Posso atualizar o banco Unibli aqui
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados:', error);
+                // Trate o erro aqui
+            });
+
+        // Agenda a execução da função de busca a cada intervalo de tempo
+        setInterval(async () => {
+            try {
+                const livros = await buscaFatecA();
+                console.log('Dados encontrados:', livros);
+                // Posso atualizar o banco Unibli aqui
+            } catch (error) {
+                console.error('Erro ao buscar dados periodicamente:', error);
+                // Trate o erro aqui
+            }
+        }, intervaloDeTempo);
+    }
+
+
+
+
+
+
     static async buscaLivroPorId(req, res){
-        const id = req.params.id
-        
+        const id = req.params.id   
         try {
             const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
             const data = await response.json();

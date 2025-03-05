@@ -6,7 +6,25 @@ module.exports = {
         // raw:true -> serve para converter o objeto especial, em um array de objetos
     },
 
-    async cadastrarLivro(isbn10, isbn13, titulo, autor, genero, edicao, descricao, quantidadePaginas, editora, idioma) {
+     async buscaLivroPorId(id_livro){
+        return await Livro.findOne({ raw: true, where: {id_livro: id_livro}})
+    },
+
+    async cadastrarLivro(
+        isbn10,
+        isbn13,
+        titulo,
+        autor,
+        genero,
+        edicao,
+        descricao,
+        quantidadePaginas,
+        editora,
+        idioma,
+        quantidadeLivro,
+        disponibilidadeLivro,
+        imagem
+    ) {
         return await Livro.create({
             isbn10,
             isbn13,
@@ -17,7 +35,10 @@ module.exports = {
             descricao,
             quantidadePaginas,
             editora,
-            idioma
+            idioma,
+            quantidadeLivro,
+            disponibilidadeLivro,
+            imagem
         })
     },
     
