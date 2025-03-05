@@ -18,8 +18,8 @@ const LivroFatec = db.define('LivroFatec',
         },
         quantidadeLivro:{
             //Não precisa definir o attr id, pois ele é criado automaticamente
-            type: DataTypes.DATE,
-            allowNull: false, //NotNull (aceita string vazia)
+            type: DataTypes.INTEGER,
+            allowNull: true, //NotNull (aceita string vazia)
         }
     },
     {

@@ -14,23 +14,14 @@ const conn = require('./db/conn')
 
 /*****************IMPORT MODELS****************/
 // Obs.: só o fato delas estarem aqui quando rodar o projeto elas já são criadas.
-const { Usuario, Fatec, Livro, Reserva } = require('./models/associations/associations');
-
-// const Reserva = require('./models/Reserva')
-// const Usuario = require('./models/Usuario')
-// const Fatec = require('./models/Fatec')
-// const Livro = require('./models/Livro')
-
-const FatecCurso = require('./models/FatecCurso')
-const Curso = require('./models/Curso')
-const LivroFatec = require('./models/LivroFatec')
-const LivroCurso = require('./models/LivroCurso')
+const { Usuario, Reserva, LivroFatec, LivroCurso, Livro, FatecCurso, Fatec, Curso } = require('./models/associations/associations');
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
 const testeRotas = require('./routes/testeRotas')
 const unibliRotas = require('./routes/unibliRotas')
 const usuariosRotas =  require('./routes/usuariosRotas')
+const acervoRotas = require('./routes/acervoRotas')
 const authRotas = require('./routes/auth0ManagementRotas')
 /**********************************************/
 
@@ -47,6 +38,7 @@ app.use(cors());
 app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
 app.use('/usuarios', usuariosRotas)
+app.use('/acervo', acervoRotas)
 app.use('/auth0', authRotas)
 /***********************************************/
 
@@ -60,8 +52,8 @@ server.listen(PORT, () => {
 
 conn
     .sync()
-    //.sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS
-    //.sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS
+    //.sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS 
+    //.sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS 
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');
     }).catch(err => {   

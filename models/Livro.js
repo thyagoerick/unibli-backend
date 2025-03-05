@@ -21,21 +21,17 @@ const Livro = db.define('Livro',
         },
         isbn10: {
             type: DataTypes.STRING,
-            allowNull: false,
-            unique: true  // Estou na dúvida se pode ser unique, pois o mesmo é unico para cada livro
+            allowNull: true,
+            unique: false 
         },
         isbn13: {
             type: DataTypes.STRING,
-            allowNull: false,
-            unique: true // Estou na dúvida se pode ser unique, pois o mesmo é unico para cada livro
+            allowNull: true,
+            unique: false
         },
         titulo: {
             type: DataTypes.STRING,
-            allowNull: true
-        },
-        subTitulo: {
-            type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false
         },
         autor: {
             type: DataTypes.STRING,
@@ -43,7 +39,7 @@ const Livro = db.define('Livro',
         },
         genero: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: true
         },
         edicao: {
             type: DataTypes.STRING,
@@ -54,10 +50,6 @@ const Livro = db.define('Livro',
             allowNull: true
         },
         quantidadePaginas: {
-            type: DataTypes.INTEGER,
-            allowNull: true
-        },
-        volume: {
             type: DataTypes.INTEGER,
             allowNull: true
         },

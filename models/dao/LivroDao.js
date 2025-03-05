@@ -6,22 +6,21 @@ module.exports = {
         // raw:true -> serve para converter o objeto especial, em um array de objetos
     },
 
-    async cadastrarLivro(isbn10, isbn13, titulo, subTitulo, autor, genero, edicao, descricao, quantidadePaginas, volume, editora, idioma) {
+    async cadastrarLivro(isbn10, isbn13, titulo, autor, genero, edicao, descricao, quantidadePaginas, editora, idioma) {
         return await Livro.create({
             isbn10,
             isbn13,
             titulo,
-            subTitulo,
             autor,
             genero,
             edicao,
             descricao,
             quantidadePaginas,
-            volume,
             editora,
             idioma
         })
     },
+    
     async atualizarLivro(id, dadosAtualizados) {
         try {
             const livro = await Livro.findByPk(id);
