@@ -1,6 +1,13 @@
 const Fatec = require('../Fatec')
 
 module.exports = {
+
+    // Método para buscar Fatec por ID
+    async buscaFatecPorId(id) {
+        // Busca uma Fatec pelo ID fornecido
+        return await Fatec.findByPk(id)
+    },
+    
     // Método assíncrono para listar todas as Fatecs
     async listarFatecs() {
         // Usa o método findAll do modelo Fatec para buscar todas as Fatecs no banco de dados
@@ -36,5 +43,5 @@ module.exports = {
             // Captura e relança qualquer erro ocorrido durante o processo
             throw new Error('Erro ao atualizar a Fatec: ' + error.message)
         }
-    }
+    },
 }

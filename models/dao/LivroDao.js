@@ -54,5 +54,21 @@ module.exports = {
         } catch (error) {
             throw new Error('Erro ao atualizar o livro: ' + error.message);
         }
-    }
+    },
+
+    async atualizarLivroTotais(id_livro, { quantidadeLivro, disponibilidadeLivro }, options = {}) {
+        return await Livro.update(
+            { quantidadeLivro, disponibilidadeLivro },
+            { where: { id_livro }, ...options }
+        );
+    },
+
+
+    async buscaLivroPorISBN10(isbn10) {
+        return await Livro.findOne({ where: { isbn10 } });
+    },
+    async buscaLivroPorISBN13(isbn13) {
+        return await Livro.findOne({ where: { isbn13 } });
+    },
+
 };

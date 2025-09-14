@@ -18,11 +18,17 @@ const { Usuario, Reserva, LivroFatec, LivroCurso, Livro, FatecCurso, Fatec, Curs
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
-const testeRotas = require('./routes/testeRotas')
+//const testeRotas = require('./routes/testeRotas')
 const unibliRotas = require('./routes/unibliRotas')
+const authRotas = require('./routes/auth0ManagementRotas')
+const fatecRotas = require('./routes/fatecRotas')
+
+// Rotas internas Unibli:
 const usuariosRotas =  require('./routes/usuariosRotas')
 const acervoRotas = require('./routes/acervoRotas')
-const authRotas = require('./routes/auth0ManagementRotas')
+const reservaRotas = require('./routes/reservaRotas')
+const cursoRotas = require('./routes/cursoRotas')
+
 /**********************************************/
 
 
@@ -35,11 +41,15 @@ app.use(express.json()) //Obter o dado do body em json()
 
 app.use(cors());
 
-app.use('/teste', testeRotas) // rotas para testar aqui
+//app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
-app.use('/usuarios', usuariosRotas)
-app.use('/acervo', acervoRotas)
 app.use('/auth0', authRotas)
+app.use('/fatec', fatecRotas)
+// Rotas internas Unibli:
+app.use('/acervo', acervoRotas)
+app.use('/usuarios', usuariosRotas)
+app.use('/reservas', reservaRotas)
+app.use('/cursos', cursoRotas)
 /***********************************************/
 
 

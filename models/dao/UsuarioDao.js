@@ -11,6 +11,10 @@ module.exports = {
         return await Usuario.findOne({ raw: true, where: {auth0UserId: auth0UserId}})
     },
 
+    async buscaUsuarioPorId(usuarioId){
+        return await Usuario.findOne({ raw: true, where: {id_usuario: usuarioId}})
+    },
+
     // Método assíncrono para cadastrar um novo usuário
     async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo) {
         // Cria um novo usuário no banco de dados com os dados fornecidos
@@ -37,23 +41,20 @@ module.exports = {
         })
     },
 
-    // Método assíncrono para atualizar os dados de um usuário existente
-    async atualizarUsuario(id, dadosAtualizados) {
-        try {
-            // Busca o usuário pelo ID fornecido
-            const usuario = await Usuario.findByPk(id)
-            // Verifica se o usuário foi encontrado
-            if (!usuario) {
-                throw new Error('Usuário não encontrado')
-            }
-
-            // Atualiza os dados do usuário com os dados fornecidos
-            await usuario.update(dadosAtualizados)
-            // Retorna o usuário atualizado
-            return usuario;
-        } catch (error) {
-            // Captura e relança qualquer erro ocorrido durante o processo
-            throw new Error('Erro ao atualizar o usuário: ' + error.message)
+    async atualizarUsuarioPorId(auth0UserId, dadosAtualizados) {
+        const usuario = await Usuario.findOne({ where: { auth0UserId } });
+        if (!usuario) {
+            throw new Error('Usuário não encontrado');
         }
+        await usuario.update(dadosAtualizados);
+        return usuario;
+    },
+
+
+    async deletarUsuarioPorId(auth0UserId){
+        const rowsDeleted = await Usuario.destroy({ where: { auth0UserId } });
+        return rowsDeleted;
     }
+
+
 }

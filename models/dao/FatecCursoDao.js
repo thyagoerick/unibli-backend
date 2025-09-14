@@ -1,4 +1,6 @@
 const FatecCurso = require('../FatecCurso')
+const Fatec = require('../Fatec');
+const Curso = require('../Curso'); // Importante para a busca inicial
 
 module.exports = {
     // Método assíncrono para listar todos os cursos da Fatec
@@ -7,10 +9,16 @@ module.exports = {
         return await FatecCurso.findAll({ raw: true })
     },
 
+    async listarFatecsPorCurso(id_curso) {
+        return await FatecCurso.findAll({
+            where: { fk_id_curso: id_curso },
+            raw: true
+        });
+    },
+
     // Método assíncrono para cadastrar um novo curso da Fatec
-    async cadastrarCursoFatec() {
-        // Cria um novo curso da Fatec no banco de dados
-        return await FatecCurso.create({})
+    async cadastrarCursoFatec(dados, options = {}) {
+        return await FatecCurso.create(dados, options);
     },
 
     // Método assíncrono para atualizar os dados de um curso da Fatec existente
@@ -51,5 +59,38 @@ module.exports = {
             // Captura e relança qualquer erro ocorrido durante o processo
             throw new Error('Erro ao deletar o curso da Fatec: ' + error.message)
         }
+    },
+
+    async buscaCursoFatec(id_curso, id_fatec, options = {}) {
+        return await FatecCurso.findOne({
+            where: {
+                fk_id_curso: id_curso,
+                fk_id_fatec: id_fatec
+            },
+            ...options
+        });
+    },
+
+     async buscarFatecsPorCurso(id_curso) {
+        const associacoes = await FatecCurso.findAll({
+            where: { fk_id_curso: id_curso },
+            // O 'include' é a parte mais importante. Ele diz ao Sequelize:
+            // "Quando encontrar as associações, traga também os dados completos da Fatec relacionada".
+            include: [{
+                model: Fatec, // O modelo a ser incluído
+                required: true // Garante que só traga associações com uma Fatec válida (INNER JOIN)
+            }],
+            raw: true, // Retorna dados puros, mais fáceis de manipular
+            nest: true // Organiza os dados do 'include' em um objeto aninhado
+        });
+
+        // O resultado será uma lista de objetos, onde cada um tem os dados da associação
+        // e um sub-objeto 'Fatec' com os detalhes da Fatec.
+        // Ex: [{ id_fatec_curso: 1, fk_id_curso: 5, fk_id_fatec: 1, Fatec: { id_fatec: 1, nome: 'Fatec São Paulo', ... } }]
+
+        // Como quero apenas a  parte da Fatec, então vou extrair isso.
+        return associacoes.map(assoc => assoc.Fatec);
     }
+
+
 }

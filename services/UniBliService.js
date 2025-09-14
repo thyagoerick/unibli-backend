@@ -3,37 +3,40 @@ require('dotenv').config()
 const Livro = require('../models/Livro')
 
 const FatecAService = require('./FatecAService')
+const FatecBService = require('./FatecBService')
+
 const  { requestOptionsGET } = require('../config/requestOptions')
 
-const urlFatec2 = `${process.env.OCI_BASE_URL_FATEC2}/livro`
+
 /**********************************************************/
 // Verifica se está executando localmente com base em uma variável de ambiente
 const urlFatec1 =  
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/teste/fatec1/acervo`
-        : `${process.env.UNIBLI_SERVER_HTTPS}/teste/fatec1/acervo`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatec/1`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/fatec/1`;
 
+//const urlFatec2 = `${process.env.OCI_BASE_URL_FATEC2}/livro`
+const urlFatec2 =  
+    (process.env.NODE_ENV === 'development')
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatec/2`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/fatec/2`;
+
+/**********************************************************/
 const unibli_base_url = 
     (process.env.NODE_ENV === 'development')
         ? `${process.env.UNIBLI_SERVER_LOCALHOST}/unibli`
         : `${process.env.UNIBLI_SERVER_HTTPS}/unibli`;
-/**********************************************************/
+
 
 
 
 module.exports = class UniBliService {
 
-    static async buscarEditoraFateB(editoraId){
-        const resp = await fetch(`https://g4cd95dfc23d355-fatecb.adb.sa-saopaulo-1.oraclecloudapps.com/ords/admin/editora/${editoraId}`)
-        const editora = await resp.json();  
-        return editora;
-    }
-
     static async transformarDadosAcervo(livros) {        
         const structAcervo =  await Promise.all( // faz o map esperar que todas as promissese sejam resolvidas
                 livros?.map( async livro => // torna a função dentro do map assincrona
             {   
-                let editoraFateB = livro?.fk_editora_editora_id ? await UniBliService.buscarEditoraFateB(livro?.fk_editora_editora_id) : null;      
+                let editoraFatecB = livro?.fk_editora_editora_id ? await FatecBService.buscarEditoraFatecB(livro?.fk_editora_editora_id) : null;      
 
                 let isbn = String(livro?.isbn).replaceAll('-','');
                 let isbn13fatecA;
@@ -54,16 +57,16 @@ module.exports = class UniBliService {
                 const structLivro = {
                     isbn10: isbn10fatecA || isbn10fatecB || null,
                     isbn13: isbn13fatecA || isbn13fatecB || null,
-                    titulo: livro?.titulo || null,
-                    autor: livro?.autor || null,
+                    titulo: livro?.titulo || "",
+                    autor: livro?.autor || "",
                     genero: livro?.genero || null,
                     edicao: livro?.edicao || null,
                     descricao: livro?.descricao || null,
                     quantidadePaginas: livro?.numero_pagina || livro?.numeroPagina || null,
-                    editora: livro?.editora || editoraFateB?.nome_editora || null,
+                    editora: livro?.editora || editoraFatecB?.nome_editora || null,
                     idioma: livro?.idioma || null,
-                    quantidadeLivro: livro?.quantidade_livro || livro?.quantidadeLivro || 1,
-                    disponibilidadeLivro: null,
+                    quantidadeLivro: livro?.quantidade_livro || livro?.quantidadeLivro || null,
+                    disponibilidadeLivro: livro?.quantidadeDisponivel === null ? livro?.quantidadeLivro : livro?.quantidadeDisponivel || null,
                     imagem: imagemFatecA || imagemFatecB || null,
                     fatec: livro?.fatec || null
                 };
@@ -71,30 +74,31 @@ module.exports = class UniBliService {
         }));
         return structAcervo;
     }
-
-    static async integraBases(){
+    static async integraAcervo(){
         
         let dataFatec1, dataFatec2;
         let livros = []
 
         try {
-            const responseFatec1 = await fetch(`${urlFatec1}`, requestOptionsGET)
-             dataFatec1 = await responseFatec1.json();
+            const responseFatec1 = await fetch(`${urlFatec1}/acervo`, requestOptionsGET)
+            dataFatec1 = await responseFatec1.json();
              
-             const acervofatec1 = dataFatec1?.map(data => {
+            const acervofatec1 = dataFatec1?.map(data => {
                 return {...data, fatec: 1}
-             })
-             livros.push(...acervofatec1)
+            })
+            livros.push(...acervofatec1)
         }catch(err){
             console.error('Erro ao buscar acervo da Fatec1:', err);
         }
 
-        try {
-            const responseFatec2 = await fetch(`${urlFatec2}`)
-             dataFatec2 = await responseFatec2.json();
-             const acervofatec2 = dataFatec2?.items?.map(data => {
+        try {    
+            const responseFatec2 = await fetch(`${urlFatec2}/acervo`)
+            dataFatec2 = await responseFatec2.json();
+
+
+            const acervofatec2 = dataFatec2?.map(data => {
                 return {...data, fatec: 2}
-             })
+            })
 
              livros.push(...acervofatec2)
         } catch(err){
@@ -102,9 +106,148 @@ module.exports = class UniBliService {
         }
         
         const basesAcervosIntegradas = await UniBliService.transformarDadosAcervo(livros)
+
         
         return basesAcervosIntegradas;
     }
+
+
+
+    static async transformarDadosCursos(cursos) {        
+        const structCursos =  await Promise.all( // faz o map esperar que todas as promissese sejam resolvidas
+                cursos?.map( async curso => // torna a função dentro do map assincrona
+        { 
+            // 1. Unifica o nome do curso.
+            //    Usa o operador '??' (nullish coalescing) para pegar o primeiro valor que não seja null/undefined.
+            const nomeDoCurso = curso.curso ?? curso.nome_curso;
+
+            // 2. Unifica o ID do curso (opcional, mas útil para depuração).
+            const idOriginal = curso._id ?? curso.curso_id;
+
+            // 3. Monta a estrutura padronizada.
+            const structCurso = {
+                nome: nomeDoCurso,
+                fatec: curso.fatec, // A 'fatec' já foi adicionada no método 'integraCursos'
+                idOriginal: idOriginal // Guardamos o ID original para referência
+            };
+
+            return structCurso;
+        }));
+        return structCursos.filter(c => c.nome);
+    }
+    
+    static async integraCursos() {
+        let cursos = [];
+
+        // --- Etapa 1: Buscar dados da Fatec 1 ---
+        try {
+            console.log("Buscando cursos da Fatec 1...");
+            const responseFatec1 = await fetch(`${urlFatec1}/cursos`, requestOptionsGET);
+            const dataFatec1 = await responseFatec1.json();
+
+            // Verifica se a resposta é um array antes de processar
+            if (Array.isArray(dataFatec1)) {
+                // Adiciona a propriedade 'fatec: 1' a cada objeto de curso
+                const cursosfatec1 = dataFatec1.map(data => ({ ...data, fatec: 1 }));
+                // Adiciona os cursos processados ao array principal
+                cursos.push(...cursosfatec1);
+            } else {
+                console.warn("Aviso: A resposta da Fatec 1 não era um array ou estava vazia.");
+            }
+
+        } catch (err) {
+            console.error('ERRO GRAVE ao buscar ou processar cursos da Fatec 1:', err);
+        }
+
+        // --- Etapa 2: Buscar dados da Fatec 2 ---
+        try {
+            console.log("Buscando cursos da Fatec 2...");
+            const responseFatec2 = await fetch(`${urlFatec2}/cursos`);
+            const dataFatec2 = await responseFatec2.json();
+
+            const listaDeCursosFatec2 = dataFatec2;
+
+            if (Array.isArray(listaDeCursosFatec2)) {
+                const cursosfatec2 = listaDeCursosFatec2.map(data => ({ ...data, fatec: 2 }));
+                cursos.push(...cursosfatec2);
+            } else {
+                console.warn("Aviso: A resposta da Fatec 2 não era um array ou estava vazia.");
+            }
+
+        } catch (err) {
+            console.error('ERRO GRAVE ao buscar ou processar cursos da Fatec 2:', err);
+        }
+
+        // --- Etapa 3: Transformar e retornar os dados consolidados ---
+        console.log(`Total de cursos integrados antes da transformação: ${cursos.length}`);
+
+        // Chama a função que padroniza os nomes dos campos (ex: 'curso' e 'nome_curso' para 'nome')
+        const basesCursosIntegrados = await UniBliService.transformarDadosCursos(cursos);
+        
+        console.log(`Total de cursos após padronização: ${basesCursosIntegrados.length}`);
+
+        return basesCursosIntegrados;
+    }    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    static async buscaLivroPorId(req, res){
+        const id = req.params.id   
+        try {
+            const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
+            const data = await response.json();
+    
+            const book = data.find(book => String(book._id || book.livro_id) === String(id));
+    
+            book ? res.json(book) : res.status(404).json({ message: "Livro não encontrado" });
+
+        } catch (error) {
+            console.error('Erro ao buscar livro por ID:', error);
+            res.status(500).json({ message: "Erro interno do servidor" });
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -147,20 +290,6 @@ module.exports = class UniBliService {
 
 
 
-    static async buscaLivroPorId(req, res){
-        const id = req.params.id   
-        try {
-            const response = await fetch(`${unibli_base_url}/acervo`, requestOptionsGET);
-            const data = await response.json();
     
-            const book = data.find(book => String(book._id || book.livro_id) === String(id));
-    
-            book ? res.json(book) : res.status(404).json({ message: "Livro não encontrado" });
-
-        } catch (error) {
-            console.error('Erro ao buscar livro por ID:', error);
-            res.status(500).json({ message: "Erro interno do servidor" });
-        }
-    }
     
 }
