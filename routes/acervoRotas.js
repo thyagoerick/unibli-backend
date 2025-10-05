@@ -6,6 +6,8 @@ const corsOptions = require('../config/corsConfig')
 
 const LivroController = require('../controllers/LivroController')
 const LivroFatecController = require('../controllers/LivroFatecController')
+const LivroCursoController = require('../controllers/LivroCursoController')
+
 
 // ------- Livros Integrar Acervo ------- OK
 router.get('/cadastrar', LivroController.cadastrarAcervo)
@@ -13,6 +15,9 @@ router.get('/cadastrar', LivroController.cadastrarAcervo)
 router.get('/livros', LivroController.listarLivros)
 // ------- Livros Fatec ------- OK
 router.get('/livros/fatec', LivroFatecController.listarLivrosFatec)
+// ------- Livros Curso -------
+// Suporte também a query string: /livros/cursos?ids=1,2
+router.get('/livros/cursos', LivroCursoController.listarLivrosAgrupadosNoCurso)
 
 //--------------------------------------------------------------------------------
 
@@ -23,8 +28,8 @@ router.get('/livros/:livroId/fatec/:fatecId', LivroFatecController.buscaLivroFat
 
 
 // ------- Livros Curso -------
-// Listar todos os livros por Curso
-//router.get('/livros/fatec', LivroFatecController.listarLivros)
+// Listar livros por curso(s) específico(s)
+router.get('/livros/cursos/:ids', LivroCursoController.listarLivrosPorCursoIds);
 
 
 module.exports = router 
