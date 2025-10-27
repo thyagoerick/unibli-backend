@@ -4,9 +4,14 @@ const router = express.Router()
 const cors = require('cors');
 const corsOptions = require('../config/corsConfig')
 
+const FatecController = require('../controllers/FatecController')
 const FatecAService = require('../services/FatecAService')
 const FatecBService = require('../services/FatecBService')
 
+
+router.get('/', /*cors(corsOptions),*/ FatecController.listarFatecs)
+
+//--------------------------------------------------------------------------------
 
 /**Acervo */
 router.get('/1/acervo', /*cors(corsOptions),*/ FatecAService.listaAcervoFatec)

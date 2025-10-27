@@ -9,33 +9,54 @@ module.exports = class LivroController {
 
     static async listarLivros(req, res){
         try {
-            const livros = await livroDao.listarLivros()
-        
-            if (!livros || livros.length === 0) {
-                return res.status(204).send();// No Content = Sem livros cadastrados
-            }
-        
-            // Captura os parâmetros da query
-            const { titulo } = req.query;
-            //console.log('Query recebida (req.query):', req.query);
-            //console.log('Livros recebidos (livros):', livros);
-            //console.log('Título da query (titulo):', titulo);
-
-            // Filtragem local dos livros
-            if(titulo){
-                const livrosFiltrados = livros.filter(livro =>
-                livro.titulo.toLowerCase().includes(titulo.toLowerCase())
-                );
-                return res.status(200).json(livrosFiltrados);
-            }else{
+            // Captura todos os parâmetros de filtro
+            const { titulo, autor, genero, fatecId, cursoId } = req.query;
+            
+            // Se não há filtros, usa o método antigo para performance
+            if (!titulo && !autor && !genero && !fatecId && !cursoId) {
+                const livros = await livroDao.listarLivros();
+                if (!livros || livros.length === 0) {
+                    return res.status(204).send();
+                }
                 return res.status(200).json(livros);
             }
+            
+            // Se há filtros, usa o novo método
+            const filtros = { titulo, autor, genero, fatecId, cursoId };
+            const livros = await livroDao.listarLivrosComFiltros(filtros);
+            
+            if (!livros || livros.length === 0) {
+                return res.status(204).send();
+            }
+            
+            return res.status(200).json(livros);
+            
         } catch (error) {
             console.error('Erro ao listar livros:', error);
             return res.status(500).json({ error: 'Erro ao listar livros', details: error.message });
         }
-        
     }
+
+    static async filtrarLivros(req, res) {
+        try {
+            const { titulo, autor, genero, fatecId, cursoId } = req.query;
+            
+            const filtros = { titulo, autor, genero, fatecId, cursoId };
+            const livros = await livroDao.listarLivrosComFiltros(filtros);
+            
+            if (!livros || livros.length === 0) {
+                return res.status(204).send();
+            }
+            
+            return res.status(200).json(livros);
+            
+        } catch (error) {
+            console.error('Erro ao filtrar livros:', error);
+            return res.status(500).json({ error: 'Erro ao filtrar livros', details: error.message });
+        }
+    }
+
+
 
     static async cadastrarAcervo(req, res) {
         const acervoIntegrado = await UniBliService.integraAcervo();

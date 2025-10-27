@@ -44,7 +44,7 @@ app.use(cors());
 //app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
 app.use('/auth0', authRotas)
-app.use('/fatec', fatecRotas)
+app.use('/fatecs', fatecRotas)
 // Rotas internas Unibli:
 app.use('/acervo', acervoRotas)
 app.use('/usuarios', usuariosRotas)

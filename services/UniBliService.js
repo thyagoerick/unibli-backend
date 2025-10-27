@@ -12,14 +12,14 @@ const  { requestOptionsGET } = require('../config/requestOptions')
 // Verifica se está executando localmente com base em uma variável de ambiente
 const urlFatec1 =  
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatec/1`
-        : `${process.env.UNIBLI_SERVER_HTTPS}/fatec/1`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatecs/1`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/fatecs/1`;
 
 //const urlFatec2 = `${process.env.OCI_BASE_URL_FATEC2}/livro`
 const urlFatec2 =  
     (process.env.NODE_ENV === 'development')
-        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatec/2`
-        : `${process.env.UNIBLI_SERVER_HTTPS}/fatec/2`;
+        ? `${process.env.UNIBLI_SERVER_LOCALHOST}/fatecs/2`
+        : `${process.env.UNIBLI_SERVER_HTTPS}/fatecs/2`;
 
 /**********************************************************/
 const unibli_base_url = 

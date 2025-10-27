@@ -13,6 +13,7 @@ const LivroCursoController = require('../controllers/LivroCursoController')
 router.get('/cadastrar', LivroController.cadastrarAcervo)
 // ------- Livros------- OK
 router.get('/livros', LivroController.listarLivros)
+router.get('/livros/filtrar', LivroController.filtrarLivros);
 // ------- Livros Fatec ------- OK
 router.get('/livros/fatec', LivroFatecController.listarLivrosFatec)
 // ------- Livros Curso -------
