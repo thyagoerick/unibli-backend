@@ -9,17 +9,17 @@ const UsuarioController = require('../controllers/UsuarioController')
 router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
 // pega para o /usuarios/ === /usuarios
 
-router.get('/usuario/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorId)
+router.get('/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorAuth0UserId)
 ///user/:id
 
-router.post('/usuario/cadastrar', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
+router.post('/cadastrar/usuario', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
 // Cadastro de usuário
 
-router.put('/usuario/atualizar/:id', /*cors(corsOptions),*/ UsuarioController.atualizarUsuarioPorId)
+router.put('/atualizar/:id', /*cors(corsOptions),*/ UsuarioController.atualizarUsuarioPorId)
 // Atualização de usuário
 
 // depois ajustar para ele remover o usuário do Auth0 também
-router.delete('/usuario/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
+router.delete('/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
 // Exclusão de usuário
 
 

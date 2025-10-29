@@ -7,7 +7,7 @@ module.exports = {
         return await Usuario.findAll({ raw: true })
     },
 
-    async buscaUsuarioPorId(auth0UserId){
+    async buscaUsuarioPorAuth0UserId(auth0UserId){
         return await Usuario.findOne({ raw: true, where: {auth0UserId: auth0UserId}})
     },
 

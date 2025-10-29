@@ -11,8 +11,9 @@ const FatecBService = require('../services/FatecBService')
 
 router.get('/', /*cors(corsOptions),*/ FatecController.listarFatecs)
 
-//--------------------------------------------------------------------------------
 
+//--------------------------------------------------------------------------------
+// ROTAS PARA USO INTERNO NA INTEGRAÇÃO
 /**Acervo */
 router.get('/1/acervo', /*cors(corsOptions),*/ FatecAService.listaAcervoFatec)
 router.get('/2/acervo', /*cors(corsOptions),*/ FatecBService.listaAcervoFatec)

@@ -14,6 +14,8 @@ router.get('/cadastrar', LivroController.cadastrarAcervo)
 // ------- Livros------- OK
 router.get('/livros', LivroController.listarLivros)
 router.get('/livros/filtrar', LivroController.filtrarLivros);
+router.get('/livros/autores', LivroController.listarAutores);
+
 // ------- Livros Fatec ------- OK
 router.get('/livros/fatec', LivroFatecController.listarLivrosFatec)
 // ------- Livros Curso -------

@@ -105,7 +105,6 @@ Curso.belongsToMany(Livro, {
 //-------------------------------------------------------------
 
 
-
 //-------------------------------------------------------------
 // [ASSOCIAÇÃO] Relações Diretas com as Tabelas de Junção (belongsTo)
 // Define que cada entrada na tabela de junção pertence a um registro
@@ -116,13 +115,24 @@ Curso.belongsToMany(Livro, {
 FatecCurso.belongsTo(Curso, { foreignKey: 'fk_id_curso' });
 FatecCurso.belongsTo(Fatec, { foreignKey: 'fk_id_fatec' });
 
-// Tabela de junção LivroFatec
+// Tabela de junção LivroFatec (é necessário fazer indo e voltando)
 LivroFatec.belongsTo(Livro, { foreignKey: 'fk_id_livro' });
+// Livro -> LivroFatec
+Livro.hasMany(LivroFatec, { foreignKey: 'fk_id_livro' });
+
 LivroFatec.belongsTo(Fatec, { foreignKey: 'fk_id_fatec' });
+// Fatec -> LivroFatec
+Fatec.hasMany(LivroFatec, { foreignKey: 'fk_id_fatec' });
 
 // Tabela de junção LivroCurso
 LivroCurso.belongsTo(Livro, { foreignKey: 'fk_id_livro' });
 LivroCurso.belongsTo(Curso, { foreignKey: 'fk_id_curso' });
+
+
+
+
+
+
 //-------------------------------------------------------------
 
 

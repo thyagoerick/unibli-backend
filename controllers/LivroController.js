@@ -1,6 +1,4 @@
 const sequelize = require('../db/conn.js')
-//const Fatec = require('../models/Fatec.js')
-//const Livro = require('../models/Livro.js')
 const livroDao = require('../models/dao/LivroDao.js')
 const livroFatecDao = require('../models/dao/LivroFatecDao.js')
 const UniBliService = require('../services/UniBliService.js')
@@ -9,11 +7,39 @@ module.exports = class LivroController {
 
     static async listarLivros(req, res){
         try {
-            // Captura todos os parâmetros de filtro
             const { titulo, autor, genero, fatecId, cursoId } = req.query;
             
+            console.log('=== CONTROLLER - Parâmetros RAW ===');
+            console.log('autor RAW:', autor, 'Tipo:', typeof autor);
+            console.log('===================================');
+            
+            const processArrayParam = (param) => {
+                if (Array.isArray(param)) {
+                    return param;
+                }
+                if (param && typeof param === 'string' && param.includes(',')) {
+                    return param.split(',').map(item => item.trim());
+                }
+                return param ? [param] : [];
+            };
+            
+            const filtros = { 
+                titulo, 
+                autor: processArrayParam(autor),
+                genero, 
+                fatecId: processArrayParam(fatecId),
+                cursoId: processArrayParam(cursoId)
+            };
+            
+            console.log('=== CONTROLLER - Filtros processados ===');
+            console.log('autor processado:', filtros.autor, 'Length:', filtros.autor.length);
+            console.log('========================================');
+            
+        
+            
             // Se não há filtros, usa o método antigo para performance
-            if (!titulo && !autor && !genero && !fatecId && !cursoId) {
+            if (!titulo && !autor && !genero && filtros.fatecId.length === 0 && filtros.cursoId.length === 0) {
+                console.log('Sem filtros - usando listarLivros() simples');
                 const livros = await livroDao.listarLivros();
                 if (!livros || livros.length === 0) {
                     return res.status(204).send();
@@ -21,14 +47,16 @@ module.exports = class LivroController {
                 return res.status(200).json(livros);
             }
             
+            console.log('Com filtros - usando listarLivrosComFiltros()');
             // Se há filtros, usa o novo método
-            const filtros = { titulo, autor, genero, fatecId, cursoId };
             const livros = await livroDao.listarLivrosComFiltros(filtros);
             
             if (!livros || livros.length === 0) {
+                console.log('Nenhum livro encontrado com os filtros');
                 return res.status(204).send();
             }
             
+            console.log(`✅ Encontrados ${livros.length} livros com os filtros`);
             return res.status(200).json(livros);
             
         } catch (error) {
@@ -41,7 +69,29 @@ module.exports = class LivroController {
         try {
             const { titulo, autor, genero, fatecId, cursoId } = req.query;
             
-            const filtros = { titulo, autor, genero, fatecId, cursoId };
+            console.log('Parâmetros RAW recebidos (filtrar):', req.query);
+            
+            // CORREÇÃO: O Express não cria arrays automaticamente para query params com mesmo nome
+            const processArrayParam = (param) => {
+                if (Array.isArray(param)) {
+                    return param;
+                }
+                if (param && typeof param === 'string' && param.includes(',')) {
+                    return param.split(',').map(item => item.trim());
+                }
+                return param ? [param] : [];
+            };
+            
+            const filtros = { 
+                titulo, 
+                autor: processArrayParam(autor), // AGORA autor também é processado como array
+                genero, 
+                fatecId: processArrayParam(fatecId),
+                cursoId: processArrayParam(cursoId)
+            };
+            
+            console.log('Filtros processados (filtrar):', filtros);
+            
             const livros = await livroDao.listarLivrosComFiltros(filtros);
             
             if (!livros || livros.length === 0) {
@@ -56,8 +106,31 @@ module.exports = class LivroController {
         }
     }
 
-
-
+    static async listarAutores(req, res){
+        try {
+            console.log('=== CONTROLLER listarAutores chamado ===');
+            
+            const autores = await livroDao.listarAutores();
+            
+            console.log('Autores retornados do DAO:', autores);
+            
+            if (!autores || autores.length === 0) {
+                console.log('Nenhum autor encontrado - retornando 204');
+                return res.status(204).send();
+            }
+            
+            console.log(`Retornando ${autores.length} autores`);
+            return res.status(200).json(autores);
+            
+        } catch (error) {
+            console.error('Erro no controller ao listar autores:', error);
+            return res.status(500).json({ 
+                error: 'Erro ao listar autores', 
+                details: error.message 
+            });
+        }
+    }
+    
     static async cadastrarAcervo(req, res) {
         const acervoIntegrado = await UniBliService.integraAcervo();
         const t = await sequelize.transaction(); // Inicia uma transação

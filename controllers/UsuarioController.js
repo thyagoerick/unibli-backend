@@ -42,11 +42,11 @@ module.exports = class UsuarioController {
         }
     }
 
-    static async buscaUsuarioPorId (req, res) {
+    static async buscaUsuarioPorAuth0UserId (req, res) {
         try {
             const auth0UserId = req.params.id;
             console.log('Rota /user/:id chamada com ID:', req.params.id);
-            const usuario = await usuarioDao.buscaUsuarioPorId(auth0UserId);
+            const usuario = await usuarioDao.buscaUsuarioPorAuth0UserId(auth0UserId);
 
             if(usuario) {
                 return res.status(200).json({usuario});

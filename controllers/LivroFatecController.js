@@ -18,7 +18,7 @@ module.exports = class LivroFatecController {
     }
     
 
-    // Método para retornar a quantidade de um livro específico por Fate e Livro utilizando o ID do livro e o ID da Fatec do método dao LivroFatecDao
+    // Método para retornar a quantidade de um livro específico por Fatec e Livro utilizando o ID do livro e o ID da Fatec do método dao LivroFatecDao
     static async buscaLivroFatecPorId(req, res) {
         const { livroId, fatecId } = req.params;
         try {
