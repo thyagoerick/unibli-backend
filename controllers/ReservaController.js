@@ -69,7 +69,9 @@ module.exports = class ReservaController {
                 // Atualiza a quantidade do livro na Fatec
                 await livroFatecDao.atualizarLivroFatec(livroId, fatecId, { quantidadeLivro: livroFatec.quantidadeLivro - 1 }, { transaction: t });
                 // Atualiza a quantidade do livro na tabela Livro
-                await livroDao.atualizarLivro(livroId, { disponibilidadeLivro: livro.disponibilidadeLivro - 1 }, { transaction: t });
+                await livroDao.atualizarLivro(livroId, { 
+                    disponibilidadeLivro: livro?.disponibilidadeLivro != 0 ? livro?.disponibilidadeLivro - 1 : livro?.quantidadeLivro - 1              
+                }, { transaction: t });
             }
            
 
