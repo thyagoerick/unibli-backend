@@ -31,6 +31,10 @@ const cursoRotas = require('./routes/cursoRotas')
 
 /**********************************************/
 
+/**************IMPORT JOBS*********************/
+const { iniciarJobReservas } = require('./utils/reservaJob');
+/**********************************************/
+
 
 /**************CONFIGURAÇÕES APP****************/
 // Configurar Express para poder pegar o body dos forms
@@ -66,6 +70,9 @@ conn
     .sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS 
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');
+
+        // Iniciar job de expiração de reservas após conexão com banco
+        iniciarJobReservas();
     }).catch(err => {   
         console.error('Erro ao conectar e sincronizar modelos:', err);
     });

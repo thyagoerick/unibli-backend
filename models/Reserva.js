@@ -1,4 +1,3 @@
-// Reserva.js - CORRIGIDO
 const { DataTypes } = require('sequelize')
 const db = require('../db/conn')
 
@@ -16,14 +15,14 @@ const Reserva = db.define('Reserva',
             defaultValue: DataTypes.NOW
         },
         status: { 
-            type: DataTypes.ENUM('ativa', 'cancelada', 'concluida'),
+            type: DataTypes.ENUM('ativa', 'cancelada', 'concluida', 'expirada', 'retirada'),
             allowNull: false,
             defaultValue: 'ativa'
         },
         dataExpiracao: {
             type: DataTypes.DATE,
             allowNull: false,
-            defaultValue: DataTypes.NOW // Valor inicial, será sobrescrito no DAO
+            defaultValue: DataTypes.NOW
         }
     },
     {

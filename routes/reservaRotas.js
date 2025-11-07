@@ -6,16 +6,19 @@ const corsOptions = require('../config/corsConfig')
 
 const ReservaController = require('../controllers/ReservaController')
 
-// Listar todas as reservas
-router.get('/', /*cors(corsOptions),*/ ReservaController.listarReservas)
-
-// Listar reservas por usuário específico
+// Rotas existentes
+router.get('/', ReservaController.listarReservas)
 router.get('/usuario/:id', ReservaController.listarReservasPorUsuario)
+router.post('/reservar', ReservaController.reservar)
+router.delete('/:reservaID/cancelar', ReservaController.cancelarReserva)
+router.patch('/:reservaID/retirar', ReservaController.marcarComoRetirada)
 
-// Cadastrar uma nova reserva
-router.post('/reservar', /*cors(corsOptions),*/ ReservaController.reservar)
-
-// Cancelar uma reserva
-router.delete('/:reservaID/cancelar', /*cors(corsOptions),*/ ReservaController.cancelarReserva)
+// NOVAS ROTAS DE DEBUG E STATUS
+router.get('/debug/expirar', ReservaController.debugExpirarReservas)
+router.get('/status', ReservaController.statusSistemaReservas)
+router.post('/debug/forcar-expiracao', (req, res) => {
+    req.query.forcarExpiracao = 'true';
+    return ReservaController.debugExpirarReservas(req, res);
+})
 
 module.exports = router
