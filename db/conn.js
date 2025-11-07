@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config()
 
-//console.log(process.env) // remova após confirmar que está funcionando
 const {
     MYSQL_HOST,
     MYSQL_PORT,
@@ -15,13 +14,24 @@ const sequelize = new Sequelize(
     MYSQL_USERNAME,
     MYSQL_PASSWORD,
     {
-        host:MYSQL_HOST,
-        port:MYSQL_PORT,
-        dialect:'mysql'
-    });
+        host: MYSQL_HOST,
+        port: MYSQL_PORT,
+        dialect: 'mysql',
+        dialectOptions: {
+            // Configurações mais específicas para MySQL
+            dateStrings: true,
+            typeCast: true,
+            supportBigNumbers: true,
+            bigNumberStrings: true
+        },
+        timezone: '-03:00',
+        // Define para não sincronizar automaticamente se já estiver dando erro
+        sync: { force: false },
+        // Desabilita o logging temporariamente para ver melhor
+        logging: false
+    }
+);
 
-
-//checka a conexão, como um "ping", mas não mantém/persiste nada no BD 
 sequelize.authenticate()
 .then(() => {
     console.log('Conexão bem-sucedida!');

@@ -1,10 +1,29 @@
 const Reserva = require('../Reserva')
+const Livro = require('../Livro') 
+const Fatec = require('../Fatec')
 
 module.exports = {
     // Método assíncrono para listar todas as reservas
     async listarReservas() {
         // Retorna todas as reservas no banco de dados
         return await Reserva.findAll({ raw: true })
+    },
+
+    async listarReservasPorUsuario(id) {
+        return await Reserva.findAll({ 
+            where: { fk_id_usuario: id },
+            include: [
+                {
+                    model: Livro, // Agora o modelo Livro está importado
+                    attributes: ['id_livro', 'titulo']
+                },
+                {
+                    model: Fatec, // Agora o modelo Fatec está importado
+                    attributes: ['id_fatec', 'nome']
+                }
+            ],
+            raw: false
+        });
     },
 
     // Método assíncrono para buscar uma reserva pelo ID
@@ -20,20 +39,22 @@ module.exports = {
     },
 
     // Método assíncrono para cadastrar uma nova reserva
-    async reservar(usuarioId, livroId, fatecId, dataDaReserva) {
-        // Verifica se os parâmetros obrigatórios foram fornecidos
-        if (!usuarioId || !livroId || !fatecId || !dataDaReserva) {
+    async reservar(usuarioId, livroId, fatecId, options = {}) {
+        if (!usuarioId || !livroId || !fatecId) {
             throw new Error('Dados obrigatórios não fornecidos')
         }
-        // Atibui a data atual para a data da reserva
-        dataDaReserva = new Date();        
-        // Cria uma nova reserva no banco de dados com a data fornecida
+        
+        // Calcula a data de expiração explicitamente
+        const dataExpiracao = new Date();
+        dataExpiracao.setDate(dataExpiracao.getDate() + 7);
+        
         return await Reserva.create({
-            dataDaReserva,
+            dataDaReserva: new Date(),
+            dataExpiracao: dataExpiracao,
             fk_id_livro: livroId,
             fk_id_usuario: usuarioId, 
             fk_id_fatec: fatecId
-        })
+        }, options)
     },
 
     // Método assíncrono para atualizar os dados de uma reserva existente

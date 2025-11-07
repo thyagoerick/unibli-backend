@@ -22,6 +22,30 @@ module.exports = class ReservaController {
         }
     }
 
+    static async listarReservasPorUsuario(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Converter para número e validar
+            const idUsuario = parseInt(id);
+            if (!id || isNaN(idUsuario)) {
+                return res.status(400).json({ error: 'ID do usuário inválido' });
+            }
+
+            const reservas = await reservaDao.listarReservasPorUsuario(idUsuario);
+
+            if (!reservas || reservas.length === 0) {
+                return res.status(204).send();
+            }
+
+            return res.status(200).json({ reservas });
+            
+        } catch (error) {
+            console.error('Erro ao listar reservas do usuário:', error);
+            return res.status(500).json({ error: 'Erro ao listar reservas do usuário' });
+        }
+    }
+
     static async reservar(req, res) {
         const t = await sequelize.transaction(); // Inicia uma transação
 

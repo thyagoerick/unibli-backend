@@ -9,6 +9,9 @@ const ReservaController = require('../controllers/ReservaController')
 // Listar todas as reservas
 router.get('/', /*cors(corsOptions),*/ ReservaController.listarReservas)
 
+// Listar reservas por usuário específico
+router.get('/usuario/:id', ReservaController.listarReservasPorUsuario)
+
 // Cadastrar uma nova reserva
 router.post('/reservar', /*cors(corsOptions),*/ ReservaController.reservar)
 
