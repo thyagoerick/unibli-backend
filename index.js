@@ -18,11 +18,21 @@ const { Usuario, Reserva, LivroFatec, LivroCurso, Livro, FatecCurso, Fatec, Curs
 /**********************************************/
 
 /*****************IMPORT ROUTES****************/
-const testeRotas = require('./routes/testeRotas')
+//const testeRotas = require('./routes/testeRotas')
 const unibliRotas = require('./routes/unibliRotas')
+const authRotas = require('./routes/auth0ManagementRotas')
+const fatecRotas = require('./routes/fatecRotas')
+
+// Rotas internas Unibli:
 const usuariosRotas =  require('./routes/usuariosRotas')
 const acervoRotas = require('./routes/acervoRotas')
-const authRotas = require('./routes/auth0ManagementRotas')
+const reservaRotas = require('./routes/reservaRotas')
+const cursoRotas = require('./routes/cursoRotas')
+
+/**********************************************/
+
+/**************IMPORT JOBS*********************/
+const { iniciarJobReservas } = require('./utils/reservaJob');
 /**********************************************/
 
 
@@ -35,11 +45,15 @@ app.use(express.json()) //Obter o dado do body em json()
 
 app.use(cors());
 
-app.use('/teste', testeRotas) // rotas para testar aqui
+//app.use('/teste', testeRotas) // rotas para testar aqui
 app.use('/unibli', unibliRotas)
-app.use('/usuarios', usuariosRotas)
-app.use('/acervo', acervoRotas)
 app.use('/auth0', authRotas)
+app.use('/fatecs', fatecRotas)
+// Rotas internas Unibli:
+app.use('/acervo', acervoRotas)
+app.use('/usuarios', usuariosRotas)
+app.use('/reservas', reservaRotas)
+app.use('/cursos', cursoRotas)
 /***********************************************/
 
 
@@ -51,11 +65,14 @@ server.listen(PORT, () => {
 });
 
 conn
-    .sync()
+    //.sync()
     //.sync({force: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS PERDE OS DADOS 
-    //.sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS 
+    .sync({alter: true}) //DESSE JEITO ALTERA A ESTRUTURA, MAS NÃO PERDE OS DADOS 
     .then(() => {
         console.log('Conectado ao banco de dados e modelos sincronizados');
+
+        // Iniciar job de expiração de reservas após conexão com banco
+        iniciarJobReservas();
     }).catch(err => {   
         console.error('Erro ao conectar e sincronizar modelos:', err);
     });

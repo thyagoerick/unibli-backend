@@ -1,55 +1,74 @@
-const LivroCurso = require('../LivroCurso')
+const LivroCurso = require('../LivroCurso');
+const sequelize = require('../../db/conn');   // instância Sequelize
+const { QueryTypes } = require('sequelize');
 
 module.exports = {
-    // Método assíncrono para listar todos os livros de curso
-    async listarLivrosCurso() {
-        // Retorna todos os livros de curso no banco de dados
-        return await LivroCurso.findAll({ raw: true })
-    },
+    async listarLivrosAgrupadosNoCurso() {
+        const registros = await sequelize.query(
+            `SELECT l.*, c.id_curso, c.nome AS nomeCurso
+             FROM Livros l
+             INNER JOIN Livros_Cursos lc ON lc.fk_id_livro = l.id_livro
+             INNER JOIN Cursos c ON c.id_curso = lc.fk_id_curso
+             ORDER BY c.id_curso, l.id_livro`,
+            { type: QueryTypes.SELECT }
+        );
 
-    // Método assíncrono para cadastrar um novo livro de curso
-    async cadastrarLivroCurso() {
-        // Cria um novo livro de curso no banco de dados
-        return await LivroCurso.create({})
-    },
+        console.log('Registros SQL:', registros);
 
-    // Método assíncrono para atualizar os dados de um livro de curso existente
-    async atualizarLivroCurso(id, dadosAtualizados) {
-        try {
-            // Busca o livro de curso pelo ID fornecido
-            const livroCurso = await LivroCurso.findByPk(id)
-            // Verifica se o livro de curso foi encontrado
-            if (!livroCurso) {
-                throw new Error('Livro de curso não encontrado')
-            }
+        const listCursosLivros = new Map();
+        registros.forEach(row => {
+            const idCurso = row.id_curso;
+            const livro = { ...row };
+            delete livro.id_curso;
+            delete livro.nomeCurso;
 
-            // Atualiza os dados do livro de curso com os dados fornecidos
-            await livroCurso.update(dadosAtualizados)
-            // Retorna o livro de curso atualizado
-            return livroCurso;
-        } catch (error) {
-            // Captura e relança qualquer erro ocorrido durante o processo
-            throw new Error('Erro ao atualizar o livro de curso: ' + error.message)
+            if (!listCursosLivros.has(idCurso)) listCursosLivros.set(idCurso, []);
+            listCursosLivros.get(idCurso).push(livro);
+        });
+
+        const resultado = [];
+        for (const [id, livros] of listCursosLivros.entries()) {
+            resultado.push({ [id]: livros });
         }
+
+        return resultado;
     },
 
-    // Método assíncrono para deletar um livro de curso
-    async deletarLivroCurso(id) {
-        try {
-            // Busca o livro de curso pelo ID fornecido
-            const livroCurso = await LivroCurso.findByPk(id)
-            // Verifica se o livro de curso foi encontrado
-            if (!livroCurso) {
-                throw new Error('Livro de curso não encontrado')
-            }
-
-            // Deleta o livro de curso do banco de dados
-            await livroCurso.destroy()
-            // Retorna true para indicar que a operação foi bem-sucedida
-            return true;
-        } catch (error) {
-            // Captura e relança qualquer erro ocorrido durante o processo
-            throw new Error('Erro ao deletar o livro de curso: ' + error.message)
+    async listarLivrosPorCursoIds(idsCursos) {
+        if (!idsCursos || !Array.isArray(idsCursos) || idsCursos.length === 0) {
+            return {};
         }
+
+        const registros = await sequelize.query(
+            `SELECT l.*, c.id_curso, c.nome AS nomeCurso
+             FROM Livros l
+             INNER JOIN Livros_Cursos lc ON lc.fk_id_livro = l.id_livro
+             INNER JOIN Cursos c ON c.id_curso = lc.fk_id_curso
+             WHERE c.id_curso IN (:ids)
+             ORDER BY c.id_curso, l.id_livro`,
+            {
+                replacements: { ids: idsCursos },
+                type: QueryTypes.SELECT
+            }
+        );
+
+        // Agrupa como no método 1
+        const listCursosLivros = new Map();
+        registros.forEach(row => {
+            const idCurso = row.id_curso;
+            const livro = { ...row };
+            delete livro.id_curso;
+            delete livro.nomeCurso;
+
+            if (!listCursosLivros.has(idCurso)) listCursosLivros.set(idCurso, []);
+            listCursosLivros.get(idCurso).push(livro);
+        });
+
+        const resultado = {};
+        for (const [id, livros] of listCursosLivros.entries()) {
+            resultado[id] = livros;
+        }
+
+        return resultado;
     }
 };

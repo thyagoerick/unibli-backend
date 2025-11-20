@@ -1,11 +1,32 @@
 const Fatec = require('../Fatec')
+const LivroFatec = require('../LivroFatec')
+
 
 module.exports = {
+
+    // Método para buscar Fatec por ID
+    async buscaFatecPorId(id, options = {}) {
+        // Busca uma Fatec pelo ID fornecido
+        return await Fatec.findByPk(id, options)
+    },
+    
     // Método assíncrono para listar todas as Fatecs
     async listarFatecs() {
         // Usa o método findAll do modelo Fatec para buscar todas as Fatecs no banco de dados
         return await Fatec.findAll({ raw: true })
         // raw:true -> serve para converter o objeto especial, em um array de objetos
+    },
+
+    // Buscar Fatecs por ID do Livro
+    async listarFatecsPorLivro(id_livro) {
+        return await Fatec.findAll({
+            include: [{
+                model: LivroFatec,
+                where: { fk_id_livro: id_livro },
+                required: true
+            }],
+            raw: true
+        });
     },
 
     // Método assíncrono para cadastrar uma nova Fatec
@@ -36,5 +57,5 @@ module.exports = {
             // Captura e relança qualquer erro ocorrido durante o processo
             throw new Error('Erro ao atualizar a Fatec: ' + error.message)
         }
-    }
+    },
 }

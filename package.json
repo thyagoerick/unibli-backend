@@ -9,7 +9,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./index.js",
-    "nodemon": "nodemon ./index.js localhost 3307"
+    "nodemon": "nodemon ./index.js localhost 3307",
+    "clean": "npm cache clean --force"
   },
   "author": "Thyago Erick S. Gois",
   "license": "UNLICENSED",
@@ -19,6 +20,8 @@
     "express": "^4.18.3",
     "mongodb": "^6.10.0",
     "mysql2": "^3.12.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
     "sequelize": "^6.37.1"
   },
   "devDependencies": {

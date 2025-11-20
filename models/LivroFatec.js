@@ -16,6 +16,11 @@ const LivroFatec = db.define('LivroFatec',
             autoIncrement: true,
             allowNull: false
         },
+            quantidadeLivro:{
+            //Não precisa definir o attr id, pois ele é criado automaticamente
+            type: DataTypes.INTEGER,
+            allowNull: true, //(aceita string vazia)
+        },
     },
     {
         tableName: 'Livros_Fatecs' // Define o nome real da tabela no banco

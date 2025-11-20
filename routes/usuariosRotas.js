@@ -9,12 +9,19 @@ const UsuarioController = require('../controllers/UsuarioController')
 router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
 // pega para o /usuarios/ === /usuarios
 
-router.get('/user/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorId)
+router.get('/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorAuth0UserId)
+///user/:id
 
+router.post('/cadastrar/usuario', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
+// Cadastro de usuário
 
-router.post('/cadastrar/user', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
-// Cadastro de usuasrio
+router.put('/atualizar/:id', /*cors(corsOptions),*/ UsuarioController.atualizarUsuarioPorId)
+// Atualização de usuário
 
+// depois ajustar para ele remover o usuário do Auth0 também
+router.delete('/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
+
+// Exclusão de usuário
 
 //router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
 // Editar usuario no banco Unibli

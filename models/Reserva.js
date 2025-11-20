@@ -1,13 +1,6 @@
-// Dá acesso a todos os tipos de dados do banco
 const { DataTypes } = require('sequelize')
-
-// Chama a conexão do banco porque aqui teremos uma operação com o banco, já na definição do model
 const db = require('../db/conn')
 
-//Criação da classe/model
-/** O método define define o módulo 
- *  define('NomeDoModulo.js', objDeDefinicaoDeTipos{})
- */
 const Reserva = db.define('Reserva', 
     {
         id_reserva: { 
@@ -16,13 +9,30 @@ const Reserva = db.define('Reserva',
             autoIncrement: true,
             allowNull: false
         },
-        dataDaReserva:{
-            //Não precisa definir o attr id, pois ele é criado automaticamente
+        dataDaReserva: {
             type: DataTypes.DATE,
-            allowNull: false, //NotNull (aceita string vazia)
+            allowNull: false,
+            defaultValue: DataTypes.NOW
+        },
+        status: { 
+            type: DataTypes.ENUM('ativa', 'cancelada', 'concluida', 'expirada', 'retirada'),
+            allowNull: false,
+            defaultValue: 'ativa'
+        },
+        dataExpiracao: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            defaultValue: DataTypes.NOW
+        }
+    },
+    {
+        tableName: 'Reservas',
+        underscored: false,
+        name: {
+            singular: 'Reserva',
+            plural: 'Reservas'
         }
     }
 )
-
 
 module.exports = Reserva
