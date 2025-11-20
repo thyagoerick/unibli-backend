@@ -3,6 +3,8 @@ const Reserva = require('../Reserva')
 const Livro = require('../Livro') 
 const Fatec = require('../Fatec')
 const sequelize = require('../../db/conn')
+const Usuario = require('../Usuario') // Adicionado para buscar o e-mail do usuário
+const { sendEmail } = require('../../services/EmailService'); // Adicionado para envio de e-mail (caminho corrigido)
 
 // ADICIONE ESTAS IMPORTACOES
 const livroDao = require('./LivroDao')
@@ -185,10 +187,15 @@ module.exports = {
             // Para cada reserva expirada, libera o livro
             for (const reserva of reservasExpiradas) {
                 try {
-                    // Busca o livro associado à reserva
-                    const livro = await livroDao.buscaLivroPorId(reserva.fk_id_livro, { transaction });
-                    if (!livro) {
-                        console.warn(`Livro não encontrado para reserva expirada ID: ${reserva.id_reserva}`);
+                    // 1. Busca dados adicionais para notificação e liberação
+                    const [livro, fatec, usuario] = await Promise.all([
+                        livroDao.buscaLivroPorId(reserva.fk_id_livro, { transaction }),
+                        Fatec.findByPk(reserva.fk_id_fatec, { transaction }),
+                        Usuario.findByPk(reserva.fk_id_usuario, { transaction })
+                    ]);
+
+                    if (!livro || !fatec || !usuario) {
+                        console.warn(`Dados incompletos para reserva expirada ID: ${reserva.id_reserva}. Pulando liberação.`);
                         continue;
                     }
 
@@ -200,10 +207,11 @@ module.exports = {
                     );
                     
                     if (!livroFatec) {
-                        console.warn(`Relacionamento livro-fatec não encontrado para reserva ID: ${reserva.id_reserva}`);
+                        console.warn(`Relacionamento livro-fatec não encontrado para reserva ID: ${reserva.id_reserva}. Pulando liberação.`);
                         continue;
                     }
 
+                    // 2. Libera o acervo (Incrementa a quantidade)
                     // Incrementa a quantidade disponível na Fatec
                     await livroFatecDao.atualizarLivroFatec(
                         reserva.fk_id_livro, 
@@ -224,11 +232,25 @@ module.exports = {
                         { transaction }
                     );
 
+                    // 3. Envia a notificação de expiração
+                    const assunto = `Reserva Expirada - Livro: ${livro.titulo}`;
+                    const corpoEmail = `
+                        <p>Prezado(a) ${usuario.nome},</p>
+                        <p>Informamos que sua reserva para o livro <strong>${livro.titulo}</strong> na Fatec <strong>${fatec.nome}</strong> expirou.</p>
+                        <p>O prazo de 3 dias para retirada foi excedido e o livro foi devolvido ao acervo.</p>
+                        <p>Se ainda deseja o livro, por favor, realize uma nova reserva.</p>
+                        <p>Obrigado por utilizar o UniBli.</p>
+                    `;
+
+                    await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
+
                     livrosLiberados++;
-                    console.log(`📚 Livro liberado: Reserva ID ${reserva.id_reserva}, Livro: ${livro.titulo}`);
+                    console.log(`📚 Livro liberado e notificação enviada: Reserva ID ${reserva.id_reserva}, Livro: ${livro.titulo}`);
 
                 } catch (error) {
                     console.error(`❌ Erro ao processar reserva expirada ID ${reserva.id_reserva}:`, error);
+                    // O erro de envio de e-mail não deve impedir a liberação do livro
+                    // Se o erro for de banco de dados, o rollback será tratado no bloco catch externo
                     continue;
                 }
             }

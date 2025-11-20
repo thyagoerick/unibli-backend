@@ -1,5 +1,9 @@
 const cron = require('node-cron');
 const reservaDao = require('../models/dao/ReservaDao');
+const { sendEmail } = require('../services/EmailService'); // Importa o serviço de e-mail (caminho corrigido)
+const Usuario = require('../models/Usuario'); // Importa o modelo de Usuário
+const Livro = require('../models/Livro'); // Importa o modelo de Livro
+const Fatec = require('../models/Fatec'); // Importa o modelo de Fatec
 
 function iniciarJobReservas() {
     // Job principal: expira reservas e libera livros (executa a cada hora)
@@ -27,11 +31,41 @@ function iniciarJobReservas() {
         try {
             console.log('🔔 Executando job de notificação de reservas...');
             
+            // A função verificarReservasProximasExpiracao já retorna os dados de Livro e Fatec
             const reservasProximas = await reservaDao.verificarReservasProximasExpiracao(24);
+            
             if (reservasProximas.length > 0) {
                 console.log(`📧 ${reservasProximas.length} reservas próximas da expiração para notificar`);
-                // Aqui você pode implementar o envio de emails/notificações
-                // await enviarNotificacoesReservasProximas(reservasProximas);
+                
+                for (const reserva of reservasProximas) {
+                    try {
+                        // Busca o usuário para obter o e-mail
+                        const usuario = await Usuario.findByPk(reserva.fk_id_usuario);
+                        
+                        if (!usuario) {
+                            console.warn(`Usuário não encontrado para reserva ID: ${reserva.id_reserva}. Pulando notificação.`);
+                            continue;
+                        }
+
+                        const dataExpiracaoFormatada = reserva.dataExpiracao.toLocaleDateString('pt-BR');
+                        
+                        const assunto = `Lembrete: Sua Reserva Expira em Breve - Livro: ${reserva.Livro.titulo}`;
+                        const corpoEmail = `
+                            <p>Prezado(a) ${usuario.nome},</p>
+                            <p>Este é um lembrete amigável de que sua reserva para o livro <strong>${reserva.Livro.titulo}</strong> na Fatec <strong>${reserva.Fatec.nome}</strong> está prestes a expirar.</p>
+                            <p>O prazo final para retirada é <strong>${dataExpiracaoFormatada}</strong>.</p>
+                            <p>Por favor, dirija-se à Fatec para retirar o livro antes que a reserva seja cancelada automaticamente e o livro retorne ao acervo.</p>
+                            <p>Obrigado por utilizar o UniBli.</p>
+                        `;
+
+                        await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
+                        console.log(`✅ Notificação enviada para o usuário ${usuario.nome} (Reserva ID: ${reserva.id_reserva})`);
+
+                    } catch (error) {
+                        console.error(`❌ Erro ao notificar reserva ID ${reserva.id_reserva}:`, error);
+                    }
+                }
+                
             } else {
                 console.log('✅ Nenhuma reserva próxima da expiração para notificar');
             }

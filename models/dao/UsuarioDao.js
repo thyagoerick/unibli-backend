@@ -71,7 +71,7 @@ module.exports = {
                 lock: t.LOCK.UPDATE // Bloqueia as reservas para garantir a atomicidade
             });
 
-            // 3. Libera o estoque para cada reserva ativa
+            // 3. Libera o acervo para cada reserva ativa
             for (const reserva of reservasAtivas) {
                 // Busca o livro e o LivroFatec com bloqueio
                 const livro = await livroDao.buscaLivroPorId(reserva.fk_id_livro, {

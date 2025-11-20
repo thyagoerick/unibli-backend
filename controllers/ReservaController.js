@@ -6,6 +6,8 @@ const reservaDao = require('../models/dao/ReservaDao.js')
 const livroFatecDao = require('../models/dao/LivroFatecDao.js')
 
 const Reserva = require('../models/Reserva')
+const { sendEmail } = require('../services/EmailService.js'); 
+
 
 module.exports = class ReservaController {
 
@@ -114,8 +116,30 @@ module.exports = class ReservaController {
                     disponibilidadeLivro: novaDisponibilidade
                 }, { transaction: t });
 
-                // Cadastra a reserva
-                await reservaDao.reservar(usuarioId, livroId, fatecId, { transaction: t });
+                   // Cadastra a reserva
+                const novaReserva = await reservaDao.reservar(usuarioId, livroId, fatecId, { transaction: t });
+
+                // 6. Envia a notificação de reserva realizada
+                const dataReservaFormatada = novaReserva.dataDaReserva.toLocaleString('pt-BR');
+                const dataExpiracaoFormatada = novaReserva.dataExpiracao.toLocaleDateString('pt-BR');
+                
+                const assunto = `Confirmação de Reserva - Livro: ${livro.titulo}`;
+                const corpoEmail = `
+                    <p>Prezado(a) ${usuario.nome},</p>
+                    <p>Sua reserva foi realizada com sucesso!</p>
+                    <p>Detalhes da Reserva:</p>
+                    <ul>
+                        <li><strong>Data da Reserva:</strong> ${dataReservaFormatada}</li>
+                        <li><strong>Livro:</strong> ${livro.titulo}</li>
+                        <li><strong>Fatec:</strong> ${fatec.nome}</li>
+                        <li><strong>Data Limite para Retirada:</strong> ${dataExpiracaoFormatada}</li>
+                    </ul>
+                    <p>Lembre-se: Você tem até <strong>${dataExpiracaoFormatada}</strong> para retirar o livro, caso contrário, a reserva será cancelada automaticamente.</p>
+                    <p>Obrigado por utilizar o UniBli.</p>
+                `;
+
+                // O e-mail do usuário está no objeto 'usuario'
+                await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
 
                 // O commit é feito automaticamente pelo `sequelize.transaction(async (t) => { ... })`
                 return { message: 'Reserva cadastrada com sucesso!' };
@@ -191,6 +215,20 @@ module.exports = class ReservaController {
 
                 // 5. Cancela a reserva (muda status)
                 await reservaDao.cancelarReserva(reservaID, { transaction: t });
+
+                // 6. Envia a notificação de cancelamento
+                const usuario = await usuarioDao.buscaUsuarioPorId(reserva.fk_id_usuario, { transaction: t });
+                const fatec = await fatecDao.buscaFatecPorId(reserva.fk_id_fatec, { transaction: t });
+                
+                const assunto = `Confirmação de Cancelamento de Reserva - Livro: ${livro.titulo}`;
+                const corpoEmail = `
+                    <p>Prezado(a) ${usuario.nome},</p>
+                    <p>Sua reserva para o livro <strong>${livro.titulo}</strong> na Fatec <strong>${fatec.nome}</strong> foi cancelada com sucesso.</p>
+                    <p>O livro foi devolvido ao acervo e está novamente disponível para reserva.</p>
+                    <p>Obrigado por utilizar o UniBli.</p>
+                `;
+
+                await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
 
                 return { message: 'Reserva cancelada com sucesso!' };
             });
