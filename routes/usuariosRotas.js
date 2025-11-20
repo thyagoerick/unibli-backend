@@ -20,8 +20,8 @@ router.put('/atualizar/:id', /*cors(corsOptions),*/ UsuarioController.atualizarU
 
 // depois ajustar para ele remover o usuário do Auth0 também
 router.delete('/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
-// Exclusão de usuário
 
+// Exclusão de usuário
 
 //router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
 // Editar usuario no banco Unibli

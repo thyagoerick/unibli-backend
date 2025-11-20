@@ -25,17 +25,20 @@ module.exports = class UsuarioController {
             
             console.log('(A) req.body',req.body)
 
-            // Alterar o valor de unidadePolo para 1 se for vazio ou null, e 2 caso contrário
-            const fatecId = (unidadePolo === null || unidadePolo === '') ? 1 : 2;
-            console.log('(B) fatecId', fatecId);
+            console.log('(B) unidadePolo', unidadePolo);
             
             if (!nome || !cpf || !endereco || !numResidencia || !cep || !telefone || !email || !ra || !auth0UserId || !rg/*|| !matricula*/) {
                 return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
             }
             
-            await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, fatecId);
-            res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-
+            // Captura o resultado da função do DAO em uma variável.
+            const novoUsuario = await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo); 
+            
+            // Envia a resposta JSON com a mensagem E o objeto do novo usuário.
+            res.status(201).json({ 
+                message: 'Usuário cadastrado com sucesso!',
+                usuario: novoUsuario // Adiciona o objeto do usuário à resposta
+            });
         } catch (error) {
             console.error('Erro ao cadastrar usuário:', error); // Exibe o erro completo no console
             res.status(500).json({ error: 'Erro ao cadastrar usuário', details: error.message }); // Retorna detalhes adicionais
@@ -62,7 +65,7 @@ module.exports = class UsuarioController {
     static async atualizarUsuarioPorId(req, res) {
         const auth0UserId = req.params.id;
         const dadosAtualizados = req.body;
-        console.log('Rota /atualizar/usuario/:id chamada com ID:', req.params.id, 'Dados:', dadosAtualizados);
+        console.log('Rota /atualizar/:id chamada com ID:', req.params.id, 'Dados:', dadosAtualizados);
         try {
             const usuarioAtualizado = await usuarioDao.atualizarUsuarioPorId(auth0UserId, dadosAtualizados);
             if (usuarioAtualizado) {
@@ -78,7 +81,7 @@ module.exports = class UsuarioController {
 
     static async deletarUsuarioPorId (req, res) {
         const auth0UserId = req.params.id;
-        console.log('Rota /deletar/usuario/:id chamada com ID:', req.params.id);
+        console.log('Rota /deletar/:id chamada com ID:', req.params.id);
         try {
             const rowsDeleted = await usuarioDao.deletarUsuarioPorId(auth0UserId);
             if (rowsDeleted > 0) {

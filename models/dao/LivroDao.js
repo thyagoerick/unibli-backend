@@ -229,8 +229,8 @@ module.exports = {
         }
     },
 
-    async buscaLivroPorId(id_livro){
-        return await Livro.findOne({ raw: true, where: {id_livro: id_livro}})
+    async buscaLivroPorId(id_livro, options = {}){
+        return await Livro.findOne({ raw: true, where: {id_livro: id_livro}, ...options})
     },
 
     async cadastrarLivro(
@@ -265,14 +265,14 @@ module.exports = {
         })
     },
     
-    async atualizarLivro(id, dadosAtualizados) {
+    async atualizarLivro(id, dadosAtualizados, options = {}) {
         try {
-            const livro = await Livro.findByPk(id);
+            const livro = await Livro.findByPk(id, options);
             if (!livro) {
                 throw new Error('Livro não encontrado');
             }
 
-            await livro.update(dadosAtualizados);
+            await livro.update(dadosAtualizados, options);
             return livro;
         } catch (error) {
             throw new Error('Erro ao atualizar o livro: ' + error.message);
@@ -285,7 +285,6 @@ module.exports = {
             { where: { id_livro }, ...options }
         );
     },
-
 
     async buscaLivroPorISBN10(isbn10) {
         return await Livro.findOne({ where: { isbn10 } });

@@ -30,8 +30,8 @@ module.exports = {
         });
     },
 
-    async buscaReservaPorId(id) {
-        const reserva = await Reserva.findByPk(id)
+    async buscaReservaPorId(id, options = {}) {
+        const reserva = await Reserva.findByPk(id, options)
         if (!reserva) {
             throw new Error('Reserva não encontrada')
         }
@@ -39,13 +39,13 @@ module.exports = {
     },
 
     // NOVO: Verificar limite de reservas por usuário
-    async verificarLimiteReservas(usuarioId) {
+    async verificarLimiteReservas(usuarioId, options = {}) {
         const reservasAtivas = await Reserva.count({
             where: {
                 fk_id_usuario: usuarioId,
                 status: 'ativa'
             }
-        });
+        }, options);
         
         return reservasAtivas >= 3; // Retorna true se atingiu o limite
     },
@@ -56,7 +56,7 @@ module.exports = {
         }
         
         // Verifica se usuário já atingiu o limite de reservas
-        const limiteAtingido = await this.verificarLimiteReservas(usuarioId);
+        const limiteAtingido = await this.verificarLimiteReservas(usuarioId, options);
         if (limiteAtingido) {
             throw new Error('Limite de 3 reservas ativas por usuário atingido');
         }
@@ -280,14 +280,15 @@ module.exports = {
         }
     },
 
-    async verificaReservaAtiva(usuarioId, livroId) {
+    async verificaReservaAtiva(usuarioId, livroId, options = {}) {
         try {
             const reservaExistente = await Reserva.findOne({
                 where: {
                     fk_id_usuario: usuarioId,
                     fk_id_livro: livroId,
                     status: 'ativa'
-                }
+                },
+                ...options
             });
 
             return !!reservaExistente;

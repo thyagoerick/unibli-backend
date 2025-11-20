@@ -11,11 +11,12 @@ module.exports = class FatecBService {
 
             const data = await response.json()
             const livros = data.items
-            //console.log(livros);
+            console.log(livros);
 
            return res.json(livros);
 
         } catch(err) {
+            console.log(livros);
             console.log(err)
         } 
     }

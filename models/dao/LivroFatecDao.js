@@ -65,9 +65,9 @@ module.exports = {
     },
 
     // Método assíncrono para buscar um livro da Fatec por ID
-    async buscaLivroFatecPorId(livroId, fatecId) {
+    async buscaLivroFatecPorId(livroId, fatecId, options = {}) {
         // Busca um livro da Fatec pelo ID do livro e ID da Fatec
-        return await LivroFatec.findOne({ raw: true, where: { fk_id_livro: livroId, fk_id_fatec: fatecId } });
+        return await LivroFatec.findOne({ raw: true, where: { fk_id_livro: livroId, fk_id_fatec: fatecId }, ...options });
     },
 
 };

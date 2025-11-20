@@ -29,7 +29,8 @@ Reserva.belongsTo(Usuario, {
     foreignKey: {
         name: 'fk_id_usuario',
         allowNull: false,
-    }
+    },
+    onDelete: 'CASCADE',
 });
 // [ASSOCIAÇÃO] Reserva pertence a uma única fatec
 Reserva.belongsTo(Fatec, {
@@ -48,7 +49,8 @@ Reserva.belongsTo(Livro, {
 
 // [ASSOCIAÇÃO] Um usuário pode ter várias reservas
 Usuario.hasMany(Reserva, {
-    foreignKey: 'fk_id_usuario'
+    foreignKey: 'fk_id_usuario',
+    onDelete: 'CASCADE',
 });
 // [ASSOCIAÇÃO] Uma fatec pode ter várias reservas
 Fatec.hasMany(Reserva, {

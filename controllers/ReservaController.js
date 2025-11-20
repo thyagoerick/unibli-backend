@@ -48,122 +48,166 @@ module.exports = class ReservaController {
     }
 
     static async reservar(req, res) {
-        const t = await sequelize.transaction();
+        const { usuarioId, livroId, fatecId } = req.body;
+
+        if (!fatecId || !usuarioId || !livroId) {
+            return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
+        }
 
         try {
-            const {usuarioId, livroId, fatecId } = req.body;
+            // Usa a transação gerenciada do Sequelize. Se houver erro, ele faz rollback automaticamente.
+            const resultado = await sequelize.transaction(async (t) => {
 
-            if (!fatecId || !usuarioId || !livroId) {
-                return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
-            }
+                // 1. Validações iniciais (sem bloqueio, pois são apenas leituras)
+                const usuario = await usuarioDao.buscaUsuarioPorId(usuarioId, { transaction: t });
+                if (!usuario) {
+                    throw new Error('Usuário não encontrado');
+                }
 
-            // Verifica se o usuário existe
-            const usuario = await usuarioDao.buscaUsuarioPorId(usuarioId);
-            if (!usuario) {
-                return res.status(404).json({ error: 'Usuário não encontrado' });
-            }
+                const fatec = await fatecDao.buscaFatecPorId(fatecId, { transaction: t });
+                if (!fatec) {
+                    throw new Error('Fatec não encontrada');
+                }
 
-            // Verifica se o livro existe
-            const livro = await livroDao.buscaLivroPorId(livroId);
-            if (!livro) {
-                return res.status(404).json({ error: 'Livro não encontrado' });
-            }
+                // 2. Verifica limite de reservas (sem bloqueio, pois é apenas contagem)
+                const limiteAtingido = await reservaDao.verificarLimiteReservas(usuarioId, { transaction: t });
+                if (limiteAtingido) {
+                    throw new Error('Limite de 3 reservas ativas por usuário atingido');
+                }
 
-            // Verifica se a Fatec existe
-            const fatec = await fatecDao.buscaFatecPorId(fatecId); 
-            if (!fatec) {
-                return res.status(404).json({ error: 'Fatec não encontrada' });
-            }
+                // 3. Verifica se já existe uma reserva ativa para o usuário e o livro
+                const reservaExistente = await reservaDao.verificaReservaAtiva(usuarioId, livroId, { transaction: t });
+                if (reservaExistente) {
+                    throw new Error('Já existe uma reserva ativa para este usuário e livro.');
+                }
 
-            // NOVO: Verifica limite de reservas
-            const limiteAtingido = await reservaDao.verificarLimiteReservas(usuarioId);
-            if (limiteAtingido) {
-                return res.status(400).json({ error: 'Limite de 3 reservas ativas por usuário atingido' });
-            }
+                // 4. BLOQUEIO DE LINHA: Busca o livro e o LivroFatec com bloqueio de atualização (FOR UPDATE)
+                // Isso impede que outras transações leiam ou modifiquem esses registros até o commit.
+                const livro = await livroDao.buscaLivroPorId(livroId, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
 
-            // Verifica se já existe uma reserva ativa para o usuário e o livro
-            const reservaExistente = await reservaDao.verificaReservaAtiva(usuarioId, livroId);
-            if (reservaExistente) {
-                return res.status(409).json({ error: 'Já existe uma reserva ativa para este usuário e livro.' });
-            }
+                if (!livro) {
+                    throw new Error('Livro não encontrado');
+                }
 
-            // Verifica se o livro está disponível na Fatec
-            const livroFatec = await livroFatecDao.buscaLivroFatecPorId(livroId, fatecId);
-            console.log('livroFatec', livroFatec);
-            
-            if (!livroFatec || livroFatec.quantidadeLivro <= 0) {
-                return res.status(400).json({ mensagem: 'Livro não disponível na Fatec.' });
-            } else if (livroFatec.quantidadeLivro >=1 ) {
+                const livroFatec = await livroFatecDao.buscaLivroFatecPorId(livroId, fatecId, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
+
+                console.log('livroFatec (com lock)', livroFatec);
+
+                // 5. Verifica disponibilidade e realiza a reserva
+                if (!livroFatec || livroFatec.quantidadeLivro <= 0) {
+                    throw new Error('Livro não disponível na Fatec.');
+                }
+
                 // Atualiza a quantidade do livro na Fatec
                 await livroFatecDao.atualizarLivroFatec(livroId, fatecId, { quantidadeLivro: livroFatec.quantidadeLivro - 1 }, { transaction: t });
+
                 // Atualiza a quantidade do livro na tabela Livro
-                await livroDao.atualizarLivro(livroId, { 
-                    disponibilidadeLivro: livro?.disponibilidadeLivro != 0 ? livro?.disponibilidadeLivro - 1 : livro?.quantidadeLivro - 1              
+                // A lógica de disponibilidadeLivro precisa ser ajustada para usar o valor atual do livro
+                const novaDisponibilidade = (livro.disponibilidadeLivro || livro.quantidadeLivro) - 1;
+                await livroDao.atualizarLivro(livroId, {
+                    disponibilidadeLivro: novaDisponibilidade
                 }, { transaction: t });
-            }
 
-            // Cadastra a reserva
-            await reservaDao.reservar(usuarioId, livroId, fatecId, { transaction: t });
+                // Cadastra a reserva
+                await reservaDao.reservar(usuarioId, livroId, fatecId, { transaction: t });
 
-            await t.commit();
+                // O commit é feito automaticamente pelo `sequelize.transaction(async (t) => { ... })`
+                return { message: 'Reserva cadastrada com sucesso!' };
+            });
 
-            return res.status(201).json({ message: 'Reserva cadastrada com sucesso!' });
+            return res.status(201).json(resultado);
 
         } catch (error) {
-            await t.rollback();
+            // O rollback é feito automaticamente pelo `sequelize.transaction` se um erro for lançado.
             console.error('Erro ao cadastrar reserva:', error);
-            
-            if (error.message.includes('Limite de 3 reservas')) {
-                return res.status(400).json({ error: error.message });
+
+            // Tratamento de erros para retornar o status HTTP correto
+            let statusCode = 500;
+            if (error.message.includes('não encontrado')) {
+                statusCode = 404;
+            } else if (error.message.includes('Limite de 3 reservas') || error.message.includes('não disponível')) {
+                statusCode = 400;
+            } else if (error.message.includes('Já existe uma reserva ativa')) {
+                statusCode = 409;
             }
-            
-            return res.status(500).json({ error: 'Erro ao cadastrar reserva', details: error.message });
+
+            return res.status(statusCode).json({ error: error.message || 'Erro ao cadastrar reserva' });
         }
     }
 
     // ATUALIZADO: Cancelar reserva (agora muda status)
     static async cancelarReserva(req, res) {
-        const t = await sequelize.transaction();
+        const { reservaID } = req.params;
+
         try {
-            const { reservaID } = req.params;
+            // Usa a transação gerenciada do Sequelize
+            const resultado = await sequelize.transaction(async (t) => {
+                // 1. Busca a reserva com bloqueio
+                const reserva = await reservaDao.buscaReservaPorId(reservaID, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
 
-            // Verifica se a reserva existe
-            const reserva = await reservaDao.buscaReservaPorId(reservaID);
-            if (!reserva) {
-                return res.status(404).json({ error: 'Reserva não encontrada' });
-            }
+                if (!reserva) {
+                    throw new Error('Reserva não encontrada');
+                }
 
-            // Verifica se o livro existe
-            const livro = await livroDao.buscaLivroPorId(reserva.fk_id_livro);
-            if (!livro) {
-                return res.status(404).json({ error: 'Livro não encontrado' });
-            }
+                // 2. Verifica se a reserva já está cancelada ou retirada
+                if (reserva.status !== 'ativa') {
+                    throw new Error(`A reserva ID ${reservaID} já está ${reserva.status}.`);
+                }
 
-            // Busca o livro e a Fatec associados à reserva
-            const livroFatec = await livroFatecDao.buscaLivroFatecPorId(reserva.fk_id_livro, reserva.fk_id_fatec);
-            if (!livroFatec) {
-                return res.status(404).json({ error: 'Livro na Fatec não encontrado' });
-            }
+                // 3. Busca o livro e o LivroFatec com bloqueio
+                const livro = await livroDao.buscaLivroPorId(reserva.fk_id_livro, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
 
-            // Só libera o livro se a reserva estava ativa
-            if (reserva.status === 'ativa') {
+                if (!livro) {
+                    throw new Error('Livro não encontrado');
+                }
+
+                const livroFatec = await livroFatecDao.buscaLivroFatecPorId(reserva.fk_id_livro, reserva.fk_id_fatec, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
+
+                if (!livroFatec) {
+                    throw new Error('Livro na Fatec não encontrado');
+                }
+
+                // 4. Libera o livro (incrementa a quantidade)
                 // Atualiza a quantidade do livro na Fatec
                 await livroFatecDao.atualizarLivroFatec(livroFatec.fk_id_livro, livroFatec.fk_id_fatec, { quantidadeLivro: livroFatec.quantidadeLivro + 1 }, { transaction: t });
+
                 // Atualiza a quantidade do livro na tabela Livro
                 await livroDao.atualizarLivro(livro.id_livro, { disponibilidadeLivro: livro.disponibilidadeLivro + 1 }, { transaction: t });
-            }
 
-            // Cancela a reserva (muda status)
-            await reservaDao.cancelarReserva(reservaID, { transaction: t });
+                // 5. Cancela a reserva (muda status)
+                await reservaDao.cancelarReserva(reservaID, { transaction: t });
 
-            await t.commit();
+                return { message: 'Reserva cancelada com sucesso!' };
+            });
 
-            return res.status(200).json({ message: 'Reserva cancelada com sucesso!' });
+            return res.status(200).json(resultado);
 
         } catch (error) {
-            await t.rollback();
             console.error('Erro ao cancelar reserva:', error);
-            return res.status(500).json({ error: 'Erro ao cancelar reserva', details: error.message });
+            
+            let statusCode = 500;
+            if (error.message.includes('não encontrada')) {
+                statusCode = 404;
+            } else if (error.message.includes('já está')) {
+                statusCode = 400;
+            }
+
+            return res.status(statusCode).json({ error: error.message || 'Erro ao cancelar reserva' });
         }
     }
 

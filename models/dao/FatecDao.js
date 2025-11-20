@@ -5,9 +5,9 @@ const LivroFatec = require('../LivroFatec')
 module.exports = {
 
     // Método para buscar Fatec por ID
-    async buscaFatecPorId(id) {
+    async buscaFatecPorId(id, options = {}) {
         // Busca uma Fatec pelo ID fornecido
-        return await Fatec.findByPk(id)
+        return await Fatec.findByPk(id, options)
     },
     
     // Método assíncrono para listar todas as Fatecs
