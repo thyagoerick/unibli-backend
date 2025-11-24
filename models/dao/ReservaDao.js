@@ -12,7 +12,19 @@ const livroFatecDao = require('./LivroFatecDao')
 
 module.exports = {
     async listarReservas() {
-        return await Reserva.findAll({ raw: true })
+        return await Reserva.findAll({
+            include: [
+                {
+                    model: Livro,
+                    attributes: ['id_livro', 'titulo']
+                },
+                {
+                    model: Fatec,
+                    attributes: ['id_fatec', 'nome']
+                }
+            ],    
+            raw: false 
+        })
     },
 
     async listarReservasPorUsuario(id) {
@@ -115,10 +127,10 @@ module.exports = {
                 throw new Error('Reserva não encontrada')
             }
             
-            await reserva.update({ status: 'retirada' }, options)
-            return { message: 'Reserva marcada como retirada com sucesso' }
+            await reserva.update({ status: 'finalizada' }, options)
+            return { message: 'Reserva marcada como finalizada com sucesso' }
         } catch (error) {
-            throw new Error('Erro ao marcar reserva como retirada: ' + error.message)
+            throw new Error('Erro ao marcar reserva como finalizada: ' + error.message)
         }
     },
 
@@ -173,7 +185,7 @@ module.exports = {
         let shouldCommit = !options.transaction; // Só faz commit se criou a transação
         
         try {
-            // Busca reservas expiradas que ainda não foram processadas
+            // Busca reservas expiradas que ainda não foram processadas (status 'expirada')
             const reservasExpiradas = await Reserva.findAll({
                 where: {
                     status: 'expirada'
@@ -184,7 +196,7 @@ module.exports = {
 
             let livrosLiberados = 0;
 
-            // Para cada reserva expirada, libera o livro
+            // Para cada reserva expirada, libera o livro e marca como 'processada'
             for (const reserva of reservasExpiradas) {
                 try {
                     // 1. Busca dados adicionais para notificação e liberação
@@ -243,6 +255,9 @@ module.exports = {
                     `;
 
                     await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
+
+                    // 4. Marca a reserva como 'processada' para evitar reprocessamento
+                    await reserva.update({ status: 'expirada_processada' }, { transaction });
 
                     livrosLiberados++;
                     console.log(`📚 Livro liberado e notificação enviada: Reserva ID ${reserva.id_reserva}, Livro: ${livro.titulo}`);
@@ -320,11 +335,14 @@ module.exports = {
     },
 
     // Remover reservas antigas (para limpeza)
-    async removerReservasAntigas(dataLimite, options = {}) {
+    // Remover reservas antigas (para limpeza)
+    async removerReservasAntigas(dataLimite, statusParaRemover = ['expirada', 'cancelada', 'expirada_processada'], options = {}) {
         try {
             const resultado = await Reserva.destroy({
                 where: {
-                    status: 'expirada',
+                    status: {
+                        [Op.in]: statusParaRemover
+                    },
                     dataExpiracao: {
                         [Op.lt]: dataLimite // CORRIGIDO: Usando Op diretamente
                     }

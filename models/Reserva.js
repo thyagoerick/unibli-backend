@@ -15,7 +15,7 @@ const Reserva = db.define('Reserva',
             defaultValue: DataTypes.NOW
         },
         status: { 
-            type: DataTypes.ENUM('ativa', 'cancelada', 'concluida', 'expirada', 'retirada'),
+            type: DataTypes.ENUM('ativa', 'cancelada', 'expirada', 'finalizada', 'expirada_processada'),
             allowNull: false,
             defaultValue: 'ativa'
         },

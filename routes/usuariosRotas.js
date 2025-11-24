@@ -6,27 +6,37 @@ const corsOptions = require('../config/corsConfig')
 
 const UsuarioController = require('../controllers/UsuarioController')
 
-router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
-// pega para o /usuarios/ === /usuarios
+// ==================================================
+// ROTAS GET (CONSULTAS)
+// ==================================================
 
+// Rota raiz - Listar todos os usuários
+router.get('/', /*cors(corsOptions),*/ UsuarioController.listarUsuarios)
+
+// Rotas específicas PRIMEIRO (antes das rotas com parâmetros)
+router.get('/invalidados', /*cors(corsOptions),*/ UsuarioController.buscarInvalidados)
+
+// Rotas com parâmetros DEPOIS
 router.get('/:id', /*cors(corsOptions),*/ UsuarioController.buscaUsuarioPorAuth0UserId)
-///user/:id
+
+// ==================================================
+// ROTAS POST (CRIAÇÃO)
+// ==================================================
 
 router.post('/cadastrar/usuario', /*cors(corsOptions),*/ UsuarioController.cadastrarUsuario)
-// Cadastro de usuário
+
+// ==================================================
+// ROTAS PUT (ATUALIZAÇÃO)
+// ==================================================
 
 router.put('/atualizar/:id', /*cors(corsOptions),*/ UsuarioController.atualizarUsuarioPorId)
-// Atualização de usuário
+router.put('/validar/:auth0UserId', /*cors(corsOptions),*/ UsuarioController.validarUsuario)
 
-// depois ajustar para ele remover o usuário do Auth0 também
+// ==================================================
+// ROTAS DELETE (EXCLUSÃO)
+// ==================================================
+
 router.delete('/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
-
-// Exclusão de usuário
-
-//router.post('/edit/user',  UsuarioController.cadastrarUsuarioTela) 
-// Editar usuario no banco Unibli
-
-
 
 /**************************************************************************************
 router.use((err, req, res, next) => {

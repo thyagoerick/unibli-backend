@@ -40,6 +40,7 @@ function iniciarJobReservas() {
                 for (const reserva of reservasProximas) {
                     try {
                         // Busca o usuário para obter o e-mail
+                        // Os dados de Livro e Fatec já devem vir do DAO, mas o usuário precisa ser buscado
                         const usuario = await Usuario.findByPk(reserva.fk_id_usuario);
                         
                         if (!usuario) {
@@ -47,12 +48,18 @@ function iniciarJobReservas() {
                             continue;
                         }
 
-                        const dataExpiracaoFormatada = reserva.dataExpiracao.toLocaleDateString('pt-BR');
+                        // Garante que dataExpiracao é um objeto Date antes de formatar
+                        const dataExpiracao = new Date(reserva.dataExpiracao);
+                        const dataExpiracaoFormatada = dataExpiracao.toLocaleDateString('pt-BR');
                         
-                        const assunto = `Lembrete: Sua Reserva Expira em Breve - Livro: ${reserva.Livro.titulo}`;
+                        // O DAO deve retornar os includes, mas para garantir a robustez, vamos usar o que está disponível
+                        const tituloLivro = reserva.Livro ? reserva.Livro.titulo : 'Livro Desconhecido';
+                        const nomeFatec = reserva.Fatec ? reserva.Fatec.nome : 'Fatec Desconhecida';
+
+                        const assunto = `Lembrete: Sua Reserva Expira em Breve - Livro: ${tituloLivro}`;
                         const corpoEmail = `
                             <p>Prezado(a) ${usuario.nome},</p>
-                            <p>Este é um lembrete amigável de que sua reserva para o livro <strong>${reserva.Livro.titulo}</strong> na Fatec <strong>${reserva.Fatec.nome}</strong> está prestes a expirar.</p>
+                            <p>Este é um lembrete amigável de que sua reserva para o livro <strong>${tituloLivro}</strong> na Fatec <strong>${nomeFatec}</strong> está prestes a expirar.</p>
                             <p>O prazo final para retirada é <strong>${dataExpiracaoFormatada}</strong>.</p>
                             <p>Por favor, dirija-se à Fatec para retirar o livro antes que a reserva seja cancelada automaticamente e o livro retorne ao acervo.</p>
                             <p>Obrigado por utilizar o UniBli.</p>
@@ -84,7 +91,8 @@ function iniciarJobReservas() {
             const dataLimite = new Date();
             dataLimite.setDate(dataLimite.getDate() - 30);
             
-            const resultado = await reservaDao.removerReservasAntigas(dataLimite);
+            // Remove reservas com status 'cancelada' ou 'expirada_processada' há mais de 30 dias
+            const resultado = await reservaDao.removerReservasAntigas(dataLimite, ['cancelada', 'expirada_processada']);
             console.log(`🗑️ ${resultado} reservas antigas removidas`);
             
         } catch (error) {

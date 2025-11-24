@@ -11,7 +11,7 @@ router.get('/', ReservaController.listarReservas)
 router.get('/usuario/:id', ReservaController.listarReservasPorUsuario)
 router.post('/reservar', ReservaController.reservar)
 router.delete('/:reservaID/cancelar', ReservaController.cancelarReserva)
-router.patch('/:reservaID/retirar', ReservaController.marcarComoRetirada)
+router.patch('/:reservaID/finalizar', ReservaController.marcarComoFinalizada)
 
 // NOVAS ROTAS DE DEBUG E STATUS
 router.get('/debug/expirar', ReservaController.debugExpirarReservas)

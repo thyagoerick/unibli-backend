@@ -211,7 +211,9 @@ module.exports = class ReservaController {
                 await livroFatecDao.atualizarLivroFatec(livroFatec.fk_id_livro, livroFatec.fk_id_fatec, { quantidadeLivro: livroFatec.quantidadeLivro + 1 }, { transaction: t });
 
                 // Atualiza a quantidade do livro na tabela Livro
-                await livroDao.atualizarLivro(livro.id_livro, { disponibilidadeLivro: livro.disponibilidadeLivro + 1 }, { transaction: t });
+                if (livro.disponibilidadeLivro < livro.quantidadeLivro) {
+                    await livroDao.atualizarLivro(livro.id_livro, { disponibilidadeLivro: livro.disponibilidadeLivro + 1 }, { transaction: t });
+                }
 
                 // 5. Cancela a reserva (muda status)
                 await reservaDao.cancelarReserva(reservaID, { transaction: t });
@@ -249,44 +251,69 @@ module.exports = class ReservaController {
         }
     }
 
-    // NOVO: Marcar reserva como retirada
-    static async marcarComoRetirada(req, res) {
+    static async marcarComoFinalizada(req, res) {
+        const { reservaID } = req.params;
+
         try {
-            const { reservaID } = req.params;
+            const resultado = await sequelize.transaction(async (t) => {
+                // 1. Busca a reserva com bloqueio
+                const reserva = await reservaDao.buscaReservaPorId(reservaID, {
+                    transaction: t,
+                    lock: t.LOCK.UPDATE,
+                });
 
-            const reserva = await reservaDao.buscaReservaPorId(reservaID);
-            if (!reserva) {
-                return res.status(404).json({ error: 'Reserva não encontrada' });
-            }
+                if (!reserva) {
+                    throw new Error('Reserva não encontrada');
+                }
 
-            await reservaDao.marcarComoRetirada(reservaID);
+                // 2. Verifica se a reserva está ativa
+                if (reserva.status !== 'ativa') {
+                    throw new Error(`A reserva ID ${reservaID} já está ${reserva.status}. Não pode ser marcada como finalizada.`);
+                }
 
-            return res.status(200).json({ message: 'Reserva marcada como retirada com sucesso!' });
+                // 3. Busca o livro para notificação
+                const livro = await livroDao.buscaLivroPorId(reserva.fk_id_livro, { transaction: t });
+                if (!livro) {
+                    throw new Error('Livro não encontrado');
+                }
 
-        } catch (error) {
-            console.error('Erro ao marcar reserva como retirada:', error);
-            return res.status(500).json({ error: 'Erro ao marcar reserva como retirada', details: error.message });
-        }
-    }
+                // 4. Marca a reserva como finalizada (muda status)
+                // IMPORTANTE: Não há alteração na disponibilidade do livro ou LivroFatec,
+                // pois a disponibilidade já foi decrementada no momento da reserva.
+                await reservaDao.marcarComoFinalizada(reservaID, { transaction: t });
 
-    // NOVO: Expirar reservas automaticamente (para ser chamado por um job/cron)
-    static async expirarReservas(req, res) {
-        try {
-            const reservasExpiradas = await reservaDao.expirarReservas();
-            const livrosLiberados = await reservaDao.liberarLivrosReservasExpiradas();
+                // 5. Envia a notificação de finalização
+                const usuario = await usuarioDao.buscaUsuarioPorId(reserva.fk_id_usuario, { transaction: t });
+                const fatec = await fatecDao.buscaFatecPorId(reserva.fk_id_fatec, { transaction: t });
+                
+                const assunto = `Confirmação de Finalização de Reserva - Livro: ${livro.titulo}`;
+                const corpoEmail = `
+                    <p>Prezado(a) ${usuario.nome},</p>
+                    <p>Confirmamos que a reserva do livro <strong>${livro.titulo}</strong> na Fatec <strong>${fatec.nome}</strong> foi finalizada com sucesso.</p>
+                    <p>Sua reserva ID ${reservaID} foi marcada como 'finalizada'.</p>
+                    <p>Obrigado por utilizar o UniBli.</p>
+                `;
 
-            return res.status(200).json({ 
-                message: 'Reservas expiradas processadas com sucesso',
-                reservasExpiradas: reservasExpiradas,
-                livrosLiberados: livrosLiberados
+                await sendEmail(usuario.email, assunto, corpoEmail, corpoEmail);
+
+                return { message: 'Reserva marcada como finalizada com sucesso!' };
             });
 
+            return res.status(200).json(resultado);
+
         } catch (error) {
-            console.error('Erro ao expirar reservas:', error);
-            return res.status(500).json({ error: 'Erro ao expirar reservas', details: error.message });
+            console.error('Erro ao marcar reserva como finalizada:', error);
+            
+            let statusCode = 500;
+            if (error.message.includes('não encontrada')) {
+                statusCode = 404;
+            } else if (error.message.includes('já está')) {
+                statusCode = 400;
+            }
+
+            return res.status(statusCode).json({ error: error.message || 'Erro ao marcar reserva como finalizada' });
         }
     }
-
     // Endpoint para debug do sistema de expiração
     static async debugExpirarReservas(req, res) {
         const t = await sequelize.transaction();
@@ -374,8 +401,8 @@ module.exports = class ReservaController {
                     ativas: await Reserva.count({ where: { status: 'ativa' } }),
                     canceladas: await Reserva.count({ where: { status: 'cancelada' } }),
                     expiradas: await Reserva.count({ where: { status: 'expirada' } }),
-                    retiradas: await Reserva.count({ where: { status: 'retirada' } }),
-                    concluidas: await Reserva.count({ where: { status: 'concluida' } })
+                    finalizadas: await Reserva.count({ where: { status: 'finalizada' } }),
+                    expiradasProcessadas: await Reserva.count({ where: { status: 'expirada_processada' } })
                 },
                 proximasExpiracao: await reservaDao.verificarReservasProximasExpiracao(24),
                 jobs: {
