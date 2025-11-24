@@ -1,4 +1,5 @@
 const Usuario = require('../Usuario')
+const { Op } = require('sequelize'); // Importando o Op para usar o OR
 
 module.exports = {
     // Método assíncrono para listar todos os usuários
@@ -16,11 +17,11 @@ module.exports = {
     },
 
     // Método assíncrono para cadastrar um novo usuário
-    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo) {
+    async cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, validado, auth0UserId, rg, unidadePolo) {
         // Cria um novo usuário no banco de dados com os dados fornecidos
 
 
-        console.log(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo);
+        console.log(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, validado, auth0UserId, rg, unidadePolo);
         
 
         return await Usuario.create({
@@ -35,6 +36,7 @@ module.exports = {
             ra,
             matricula,
             tipoBibliotecario,
+            validado,
             auth0UserId,
             rg,
             fk_id_fatec:unidadePolo //fk_id_fatec
@@ -47,6 +49,50 @@ module.exports = {
             throw new Error('Usuário não encontrado');
         }
         await usuario.update(dadosAtualizados);
+        return usuario;
+    },
+
+    async buscarInvalidados() {        
+        console.log('=== DEBUG buscarInvalidados ===');
+        
+        try {
+            // Primeiro, vamos ver quantos usuários existem no total
+            const totalUsuarios = await Usuario.count();
+            console.log('Total de usuários no banco:', totalUsuarios);
+
+            // Vamos ver todos os usuários e seus status
+            const todosUsuarios = await Usuario.findAll({ 
+                raw: true,
+                attributes: ['id_usuario', 'nome', 'validado', 'tipoBibliotecario']
+            });
+            console.log('Todos os usuarios:', JSON.stringify(todosUsuarios, null, 2));
+
+            // Agora a query que estamos tentando
+            const result = await Usuario.findAll({ 
+                raw: true, 
+                where: {
+                    validado: false,
+                    tipoBibliotecario: false
+                }
+            });
+            
+            console.log('Resultado da busca específica:', JSON.stringify(result, null, 2));
+            console.log('Número de usuários encontrados:', result.length);
+            
+            return result;
+        } catch (error) {
+            console.error('Erro no buscarInvalidados:', error);
+            throw error;
+        }
+    },
+
+    async validarUsuario(auth0UserId) {
+        const usuario = await Usuario.findOne({ where: { auth0UserId } });
+        if (!usuario) {
+            throw new Error('Usuário não encontrado');
+        }
+        // Define 'validado' como true
+        await usuario.update({ validado: true });
         return usuario;
     },
 

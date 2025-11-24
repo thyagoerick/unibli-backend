@@ -21,18 +21,18 @@ module.exports = class UsuarioController {
 
     static async cadastrarUsuario(req, res) {
         try {
-            const { nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo} = req.body;
+            const { nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, validado, auth0UserId, rg, unidadePolo} = req.body;
             
             console.log('(A) req.body',req.body)
 
             console.log('(B) unidadePolo', unidadePolo);
             
-            if (!nome || !cpf || !endereco || !numResidencia || !cep || !telefone || !email || !ra || !auth0UserId || !rg/*|| !matricula*/) {
+            if (!nome || !cpf || !telefone || !email || !auth0UserId || !rg) {
                 return res.status(400).json({ error: 'Faltam dados obrigatórios!' });
             }
             
             // Captura o resultado da função do DAO em uma variável.
-            const novoUsuario = await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, auth0UserId, rg, unidadePolo); 
+            const novoUsuario = await usuarioDao.cadastrarUsuario(nome, cpf, endereco, numResidencia, complemento, cep, telefone, email, ra, matricula, tipoBibliotecario, validado, auth0UserId, rg, unidadePolo); 
             
             // Envia a resposta JSON com a mensagem E o objeto do novo usuário.
             res.status(201).json({ 
@@ -92,6 +92,53 @@ module.exports = class UsuarioController {
         }catch (error) {
             console.error('Erro ao deletar usuário:', error);
             return res.status(500).json({ message: 'Erro interno ao deletar usuário.' });
+        }
+    }
+
+    static async buscarInvalidados(req, res) {
+        try {
+            console.log('=== Controller: buscarInvalidados chamado ===');
+            
+            const usuarios = await usuarioDao.buscarInvalidados();
+            
+            console.log('Controller - Usuários retornados do DAO:', usuarios);
+            console.log('Controller - Tipo de dados:', typeof usuarios);
+            console.log('Controller - É array?', Array.isArray(usuarios));
+            
+            // Sempre retorna 200, mesmo se o array estiver vazio
+            return res.status(200).json({ 
+                usuarios: usuarios || [],
+                total: usuarios ? usuarios.length : 0,
+                message: usuarios && usuarios.length > 0 
+                    ? 'Usuários não validados encontrados' 
+                    : 'Nenhum usuário não validado encontrado'
+            });
+            
+        } catch (error) {
+            console.error('Erro no controller ao buscar usuários não validados:', error);
+            return res.status(500).json({ 
+                error: 'Erro ao buscar usuários não validados', 
+                details: error.message 
+            });
+        }
+    }
+
+    static async validarUsuario(req, res) {
+        const auth0UserId = req.params.auth0UserId;
+        try {
+            const usuarioValidado = await usuarioDao.validarUsuario(auth0UserId);
+            
+            return res.status(200).json({ 
+                message: 'Usuário validado com sucesso!', 
+                usuario: usuarioValidado 
+            });
+            
+        } catch (error) {
+            console.error('Erro ao validar usuário:', error);
+            if (error.message === 'Usuário não encontrado') {
+                return res.status(404).json({ message: 'Usuário não encontrado.' });
+            }
+            return res.status(500).json({ message: 'Erro interno ao validar usuário.' });
         }
     }
     
