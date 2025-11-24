@@ -119,8 +119,8 @@ module.exports = {
         }
     },
 
-    // NOVO: Marcar reserva como retirada
-    async marcarComoRetirada(id, options = {}) {
+    // NOVO: Marcar reserva como finalizada
+    async marcarComoFinalizada(id, options = {}) {
         try {
             const reserva = await Reserva.findByPk(id, options)
             if (!reserva) {

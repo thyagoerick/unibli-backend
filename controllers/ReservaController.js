@@ -289,8 +289,8 @@ module.exports = class ReservaController {
                 const assunto = `Confirmação de Finalização de Reserva - Livro: ${livro.titulo}`;
                 const corpoEmail = `
                     <p>Prezado(a) ${usuario.nome},</p>
-                    <p>Confirmamos que a reserva do livro <strong>${livro.titulo}</strong> na Fatec <strong>${fatec.nome}</strong> foi finalizada com sucesso.</p>
-                    <p>Sua reserva ID ${reservaID} foi marcada como 'finalizada'.</p>
+                    <p>Confirmamos que a reserva do livro <strong>${livro.titulo}</strong> na <strong>${fatec.nome}</strong> foi finalizada com sucesso.</p>
+                    <p>Sua foi marcada como <strong>finalizada<strong>.</p>
                     <p>Obrigado por utilizar o UniBli.</p>
                 `;
 
