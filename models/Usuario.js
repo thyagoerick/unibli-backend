@@ -28,19 +28,16 @@ const Usuario = db.define(
             allowNull: false, //NotNull (aceita string vazia)
         },
         cpf: {
-
             type: DataTypes.STRING,
             allowNull: false,
         },
         endereco: {
-
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true, // aqui é true para fazer com que o bibliotecario não precise mas o usuario comum sim
         },
         numResidencia: {
-
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,// aqui é true para fazer com que o bibliotecario não precise mas o usuario comum sim
         },
         complemento: {
 
@@ -50,7 +47,7 @@ const Usuario = db.define(
         cep: {
 
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true, // aqui é true para fazer com que o bibliotecario não precise mas o usuario comum sim
         },
         telefone: {
 
@@ -63,29 +60,28 @@ const Usuario = db.define(
             allowNull: false,
         },
         ra: {
-
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,// aqui é true para fazer com que o bibliotecario não precise mas o usuario comum sim
         },
         matricula: {
-
             type: DataTypes.STRING,
-            allowNull: true, //mudar para false depois pois deve ser obrigatósio
+            allowNull: true,
         },
         tipoBibliotecario: {
 
             type: DataTypes.BOOLEAN,
             allowNull: false,
-            set(value) {
-                this.setDataValue('tipoBibliotecario', value != null ? value : false);
-            }
+        },
+        validado: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+
         },
         auth0UserId: {
             type: DataTypes.STRING,
             allowNull: false,
         },
         rg: {
-
             type: DataTypes.STRING,
             allowNull: false,
         },
