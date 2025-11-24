@@ -21,6 +21,10 @@ module.exports = {
                 {
                     model: Fatec,
                     attributes: ['id_fatec', 'nome']
+                },
+                 {
+                    model: Usuario,
+                    attributes: ['id_usuario', 'nome', 'ra']
                 }
             ],    
             raw: false 
