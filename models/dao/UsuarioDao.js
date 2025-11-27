@@ -1,4 +1,8 @@
 const Usuario = require('../Usuario')
+const Reserva = require('../Reserva'); // Adicionado
+const livroDao = require('./LivroDao'); // Adicionado
+const livroFatecDao = require('./LivroFatecDao'); // Adicionado
+const sequelize = require('../../db/conn'); // Caminho corrigido para a instância do Sequelize
 const { Op } = require('sequelize'); // Importando o Op para usar o OR
 
 module.exports = {

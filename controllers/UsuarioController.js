@@ -1,4 +1,6 @@
 const Usuario = require('../models/Usuario')
+const Auth0ManagementService = require('../services/Auth0ManagementService');
+const Auth0UsersService = require('../services/Auth0UsersService');
 const usuarioDao = require('../models/dao/UsuarioDao')
 
 
@@ -79,19 +81,50 @@ module.exports = class UsuarioController {
         }
     }
 
-    static async deletarUsuarioPorId (req, res) {
+    static async deletarUsuarioPorId(req, res) {
         const auth0UserId = req.params.id;
-        console.log('Rota /deletar/:id chamada com ID:', req.params.id);
+        const auth0UserIdToken = req.auth.payload.sub; // ID do usuário autenticado pelo token
+
+        console.log('--- DEPURANDO DELETAR USUÁRIO ---');
+        console.log('ID da URL (auth0UserId):', auth0UserId);
+        console.log('ID do Token (auth0UserIdToken):', auth0UserIdToken);
+        console.log('Comparação (auth0UserId !== auth0UserIdToken):', auth0UserId !== auth0UserIdToken);
+        console.log('---------------------------------');
+
+        // 1. Verificação de segurança: O usuário só pode deletar a própria conta.
+        if (auth0UserId !== auth0UserIdToken) {
+            return res.status(403).json({
+                message: "Acesso negado. Você só pode deletar sua própria conta."
+            });
+        }
+
         try {
+            // Pega token do Auth0
+            const tokenData = await Auth0ManagementService.getToken();
+            const accessToken = tokenData.access_token;
+
+            // Deleta no Auth0
+            await Auth0UsersService.deletarUsuario(auth0UserId, accessToken);
+
+            // Deleta no banco
             const rowsDeleted = await usuarioDao.deletarUsuarioPorId(auth0UserId);
-            if (rowsDeleted > 0) {
-                return res.status(200).json({ message: 'Usuário deletado com sucesso!', rowsDeleted });
-            } else {
-                return res.status(404).json({ message: 'Usuário não encontrado.' });
-            } 
-        }catch (error) {
-            console.error('Erro ao deletar usuário:', error);
-            return res.status(500).json({ message: 'Erro interno ao deletar usuário.' });
+
+            return res.json({
+                message: "Usuário deletado!",
+                rowsDeleted
+            });
+
+        } catch (error) {
+            console.error('Erro ao deletar usuário (Controller):', error);
+            // Se for um erro de validação de token, o erro.code será 'ERR_JWT_INVALID'
+            // Se for um erro de Axios, o erro.response.status terá o código HTTP
+            const statusCode = error.response?.status || 500;
+            const errorMessage = error.response?.data || error.message;
+
+            return res.status(statusCode).json({
+                message: "Erro ao deletar usuário.",
+                error: errorMessage
+            });
         }
     }
 

@@ -1,5 +1,19 @@
 const express = require('express')
 const router = express.Router()
+require('dotenv').config();
+const { auth } = require('express-oauth2-jwt-bearer');
+
+// Middleware para validar o JWT de acesso
+const checkJwt = auth({
+    // O audience deve ser o identificador da sua API no Auth0.
+    // Usaremos a URL do seu servidor como audience, que é o padrão se não for especificado.
+    // O audience deve ser o identificador da sua API no Auth0.
+    // O valor padrão para o audience da API de Gerenciamento do Auth0 é a URL /api/v2/
+    audience: `${process.env.AUTH0_BASE_URL}/api/v2/`,
+    // O issuerBaseURL é a URL da sua conta Auth0 (AUTH0_BASE_URL)
+    issuerBaseURL: process.env.AUTH0_BASE_URL,
+    tokenSigningAlg: 'RS256'
+});
 
 const cors = require('cors');
 const corsOptions = require('../config/corsConfig')
@@ -36,7 +50,7 @@ router.put('/validar/:auth0UserId', /*cors(corsOptions),*/ UsuarioController.val
 // ROTAS DELETE (EXCLUSÃO)
 // ==================================================
 
-router.delete('/deletar/:id', /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
+router.delete('/deletar/:id', checkJwt, /*cors(corsOptions),*/ UsuarioController.deletarUsuarioPorId)
 
 /**************************************************************************************
 router.use((err, req, res, next) => {
